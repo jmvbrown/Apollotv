@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>Test</title>
+    </head>
+    <body>
+        <noscript>
+            <strong>Doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        </noscript>
+        <div>
+            <input id="queryString" type="text" placeholder="search" />
+            <button type="button" onclick="search()">Search</button>
+            <button type="button" onclick="stop()">Stop</button>
+        </div>
+        <div id="results"></div>
+        <script type="text/javascript" charset="utf-8">
+            var es;
+            function search() {
+                var queryString = document.getElementById('queryString').value;
+                es = new EventSource(`http://127.0.0.1:3000/api/search?queryString=${queryString}`)
+                es.addEventListener('results', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('error', function (e) {
+                    console.error(e.data);
+                });
+            }
+            function stop() {
+                es.close();
+            }
+        </script>
+    </body>
+</html>
