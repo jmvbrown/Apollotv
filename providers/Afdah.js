@@ -9,7 +9,8 @@ async function Afdah(queryString, sse) {
     const browser = await puppeteer.launch({args: ['--no-sandbox']});
     
     // These are all the same host I think. https://xmovies8.org isn't loading.
-    const urls = ["https://afdah.org", "https://genvideos.com", "https://genvideos.co", "https://watch32hd.co", "https://putlockerhd.co", "https://xmovies8.org"];
+    //const urls = ["https://afdah.org", "https://genvideos.com", "https://genvideos.co", "https://watch32hd.co", "https://putlockerhd.co"];
+    const urls = "https://afdah.org";
     const promises = [];
 
     // Go to each url and scrape for links, then send the link to the client 
