@@ -16,7 +16,28 @@ Install node (v10.10.0) and npm (v6.4.1).
 ### Testing the server
 
 - Set the `SECRET_CLIENT_ID` inside `public/index.html` to match the same value inside `.env`
-- Run `node server.js`
+- Run `node server.js` (or `npm start`)
 - Open your browser to `127.0.0.1:3000`
+
+#### Movies
 - Search for the exact name of a movie, like `The Avengers`.
 - Open the developer console and watch the links arrive.
+
+Calling the TV API:
+- URL: `127.0.0.1:3000/api/search`
+- Querystrings required: 
+    `queryString`: movie title (exact name)
+    `token`: valid JWT token
+
+
+#### TV
+- Search for a TV show by filling in name, season, episode. Eg: `Suits 4 1` (in the respective text boxes)
+- Open the developer console and watch the links arrive.
+
+Calling the TV API:
+- URL: `127.0.0.1:3000/api/search/tv`
+- Querystrings required: 
+    `show`: name of show
+    `season`: season
+    `episode`: episode
+    `token`: valid JWT token

@@ -32,6 +32,9 @@ app.get('/', function(req, res) {
 app.post('/api/login', api.login);
 app.get('/api/search', api.verifyToken, api.search);
 
+app.get('/api/search/tv', api.verifyToken, api.searchTv);
+
+
 app.listen(3000, () => {
     console.log('express server listening on: 3000');
 });
