@@ -177,10 +177,24 @@
 
         <div id="results"></div>
         <script type="text/javascript" charset="utf-8">
-            var es;
-            function search() {
+            let es;
+            async function search() {
+                let token = localStorage.getItem('token');
+                if (!token) {
+                    let response = await fetch('/api/login', {
+                        method: 'POST', 
+                        body: JSON.stringify({clientID: 'thisisjustaclienttest'}),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+                    let responseJSON = await response.json();
+                    token = responseJSON.token;
+                    localStorage.setItem('token', token);
+                }
                 var queryString = document.getElementById('queryString').value;
-                es = new EventSource(`http://127.0.0.1:3000/api/search?queryString=${queryString}`)
+                es = new EventSource(`/api/search?queryString=${queryString}&token=${token}`);
                 es.addEventListener('results', function (e) {
                     console.log(e.data);
                 });

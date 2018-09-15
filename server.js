@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const api = require('./api');
+const verifyToken = require('./api');
 
 require('dotenv').config();
 
@@ -28,8 +29,8 @@ app.get('/', function(req, res) {
     res.sendFile(`${pathToApp}/public/index.html`);
 });
 
-app.get('/api/search', api.search);
-// app.get('/results', api.results);
+app.post('/api/login', api.login);
+app.get('/api/search', api.verifyToken, api.search);
 
 app.listen(3000, () => {
     console.log('express server listening on: 3000');

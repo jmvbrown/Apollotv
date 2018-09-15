@@ -15,9 +15,9 @@ async function Afdah(queryString, sse) {
     // Go to each url and scrape for links, then send the link to the client 
     async function scrape(url) {
         try {
-            const usePlus = url === "https://putlockerhd.co" || url === "https://genvideos.co"
+            const usePlus = url === "https://putlockerhd.co" || url === "https://genvideos.co" || url === "https://watch32hd.co"
             const html = await rp({
-                uri: `${url}/results?q=${usePlus ? queryString.replace(/ /, '+'): queryString}`,
+                uri: `${url}/results?q=${usePlus ? queryString.replace(/ /, '%2B'): queryString}`,
                 timeout: 5000
             });
 
