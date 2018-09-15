@@ -2,7 +2,9 @@
   "name": "claws",
   "version": "0.0.1",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
