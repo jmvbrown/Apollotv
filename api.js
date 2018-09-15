@@ -35,11 +35,22 @@ function search(req, res) {
     const sse = new SSE();
     sse.init(req, res);
 
-    for (let provider of providers) {
+    for (let provider of providers.movies) {
         provider(req.query.queryString, sse);
+    }
+}
+
+function searchTv(req, res) {
+    const sse = new SSE();
+    sse.init(req, res);
+
+    for (let provider of providers.tv) {
+        provider(req, sse);
     }
 }
 
 exports.login = login;
 exports.verifyToken = verifyToken;
+
 exports.search = search;
+exports.searchTv = searchTv;
