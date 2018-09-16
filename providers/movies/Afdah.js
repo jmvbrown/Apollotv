@@ -4,7 +4,9 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 
-async function Afdah(queryString, sse) {
+async function Afdah(req, sse) {
+    const movieTitle = req.query.title;
+
     // Start up the headless browser in no-sandbox mode to make it truly headless
     const browser = await puppeteer.launch({args: ['--no-sandbox']});
     
@@ -15,9 +17,9 @@ async function Afdah(queryString, sse) {
     // Go to each url and scrape for links, then send the link to the client 
     async function scrape(url) {
         try {
-            const usePlus = url === "https://putlockerhd.co" || url === "https://genvideos.co" || url === "https://watch32hd.co"
+            const usePlus = url === "https://afdah.org" || url === "https://genvideos.co" || url === "https://watch32hd.co"
             const html = await rp({
-                uri: `${url}/results?q=${usePlus ? queryString.replace(/ /, '%2B'): queryString}`,
+                uri: `${url}/results?q=${usePlus ? movieTitle.replace(/ /, '+'): movieTitle}`,
                 timeout: 5000
             });
 
@@ -26,7 +28,7 @@ async function Afdah(queryString, sse) {
 
             $('.cell').toArray().some(element => {
                 const videoName = $(element).find('.video_title').text().trim();
-                if (videoName === queryString) {
+                if (videoName === movieTitle) {
                     videoId = $(element).find('.video_title h3 a').attr('href').trim();
                     return true;
                 }

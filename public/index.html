@@ -169,13 +169,13 @@
         </noscript>
 
         <div class="searchBox">
-            <input id="queryString" type="text" placeholder="Enter a movie..." />
+            <input id="movieTitle" type="text" placeholder="Enter a movie..." />
             <br><br><br>
-            <button type="button" class="material-button-raised primary" onclick="search()">Search</button>
+            <button type="button" class="material-button-raised primary" onclick="searchMovies()">Search</button>
             <button type="button" class="material-button-raised red" onclick="stop()">Stop</button>
         </div>
         <div>
-            <input id="showname" type="text" placeholder="show" />
+            <input id="showTitle" type="text" placeholder="show" />
             <input id="season" type="text" placeholder="season" />
             <input id="episode" type="text" placeholder="episode" />
             
@@ -186,7 +186,7 @@
         <script type="text/javascript" charset="utf-8">
             const SECRET_CLIENT_ID = 'thisisjustaclienttest';
             let es;
-            async function search() {
+            async function searchMovies() {
                 let token = localStorage.getItem('token');
                 if (!token) {
                     let response = await fetch('/api/login', {
@@ -201,8 +201,8 @@
                     token = responseJSON.token;
                     localStorage.setItem('token', token);
                 }
-                var queryString = document.getElementById('queryString').value;
-                es = new EventSource(`/api/search?queryString=${queryString}&token=${token}`);
+                var movieTitle = document.getElementById('movieTitle').value;
+                es = new EventSource(`/api/search/movies?title=${movieTitle}&token=${token}`);
                 es.addEventListener('results', function (e) {
                     console.log(e.data);
                 });
@@ -225,11 +225,11 @@
                         token = responseJSON.token;
                         localStorage.setItem('token', token);
                     }
-                    var showname = document.getElementById('showname').value;
+                    var showTitle = document.getElementById('showTitle').value;
                     var season = document.getElementById('season').value;
                     var episode = document.getElementById('episode').value;
                     
-                    es = new EventSource(`/api/search/tv?show=${showname}&season=${season}&episode=${episode}&token=${token}`)
+                    es = new EventSource(`/api/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
                     es.addEventListener('results', function (e) {
                         console.log(e.data);
                     });

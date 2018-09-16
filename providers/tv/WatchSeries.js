@@ -6,7 +6,8 @@ const puppeteer = require('puppeteer');
 
 async function WatchSeries(req, sse) {
     console.log(req.query)
-    const {show, season, episode} = req.query
+    const showTitle = req.query.title;
+    const {season, episode} = req.query
 
     // These providers were in the Terarium source, but are now dead..... We need to find others
     //, "https://seriesfree1.bypassed.bz"]//, "https://seriesfree1.bypassed.eu", "https://seriesfree1.bypassed.bz"];
@@ -18,12 +19,12 @@ async function WatchSeries(req, sse) {
     // Go to each url and scrape for links, then send the link to the client 
     async function scrape(url) {
         try {
-            let $ = await _loadPageWithCheerio(`${url}/search/${show.replace(/ /, '%20')}`)
+            let $ = await _loadPageWithCheerio(`${url}/search/${showTitle.replace(/ /, '%20')}`)
             let serieLink;
             $('.separate').toArray().some(element => {
                 let serieResult = $(element).find('.poster').attr('href');
                 let title = $(element).find('.poster').attr('title');
-                if (_isSerieFound(show, serieResult, title)) {
+                if (_isSerieFound(showTitle, serieResult, title)) {
                     serieLink = `${url}${serieResult}`
                     return true;
                 }
@@ -68,7 +69,7 @@ async function WatchSeries(req, sse) {
                     await page.click('.vjs-big-play-button')
                     await page.waitFor(() => !!document.querySelector('video').src, );
                     const videoSrc = await page.$eval('video', video => video.src);
-                    sse.send({ videoSrc, provider: url, show: `${show}, s${season}_e${episode}` }, 'results');
+                    sse.send({ videoSrc, provider: url, show: `${showTitle}, s${season}_e${episode}` }, 'results');
                     
                 } catch (err)  {
                     if (err.message.includes('timeout')) {
@@ -96,9 +97,6 @@ async function WatchSeries(req, sse) {
     await Promise.all(promises);
 }
 
-module.exports = exports = WatchSeries;
-
-
 const _loadPageWithCheerio = async (url) => {
     const html = await rp({
         uri: `${url}`,
@@ -111,3 +109,5 @@ const _isSerieFound = (queryString, serieResult, serieTitle) => {
     return (
         serieResult && (serieResult.trim().includes('/serie/') || serieTitle.trim().toLowerCase().includes(queryString.toLowerCase())))
 }
+
+module.exports = exports = WatchSeries;

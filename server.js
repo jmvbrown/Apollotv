@@ -30,7 +30,7 @@ app.get('/', function(req, res) {
 });
 
 app.post('/api/login', api.login);
-app.get('/api/search', api.verifyToken, api.search);
+app.get('/api/search/movies', api.verifyToken, api.searchMovies);
 
 app.get('/api/search/tv', api.verifyToken, api.searchTv);
 

@@ -31,12 +31,12 @@ function verifyToken(req, res, next) {
   });
 }
 
-function search(req, res) {
+function searchMovies(req, res) {
     const sse = new SSE();
     sse.init(req, res);
 
-    for (let provider of providers.movies) {
-        provider(req.query.queryString, sse);
+    for (let provider of [...providers.movies, ...providers.universal]) {
+        provider(req, sse);
     }
 }
 
@@ -44,7 +44,7 @@ function searchTv(req, res) {
     const sse = new SSE();
     sse.init(req, res);
 
-    for (let provider of providers.tv) {
+    for (let provider of [...providers.tv, ...providers.universal]) {
         provider(req, sse);
     }
 }
@@ -52,5 +52,5 @@ function searchTv(req, res) {
 exports.login = login;
 exports.verifyToken = verifyToken;
 
-exports.search = search;
+exports.searchMovies = searchMovies;
 exports.searchTv = searchTv;
