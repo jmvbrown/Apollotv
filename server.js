@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const api = require('./api');
 const verifyToken = require('./api');
+const morgan = require('morgan')
+const logger = require('./utils/logger')
 
 require('dotenv').config();
 
@@ -24,6 +26,8 @@ app.use(compression({filter: (req, res) => {
     // fallback to standard filter function
     return compression.filter(req, res)
 }}));
+
+app.use(morgan('combined', { stream: logger.stream }))
 
 app.get('/', function(req, res) {
     res.sendFile(`${pathToApp}/public/index.html`);
