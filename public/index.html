@@ -178,7 +178,7 @@
             <input id="showTitle" type="text" placeholder="show" />
             <input id="season" type="text" placeholder="season" />
             <input id="episode" type="text" placeholder="episode" />
-            
+
             <button type="button" onclick="searchTV()">Search</button>
             <button type="button" onclick="stop()">Stop</button>
         </div>
@@ -186,21 +186,34 @@
         <script type="text/javascript" charset="utf-8">
             const SECRET_CLIENT_ID = 'thisisjustaclienttest';
             let es;
-            async function searchMovies() {
+            async function authenticate() {
                 let token = localStorage.getItem('token');
-                if (!token) {
-                    let response = await fetch('/api/login', {
-                        method: 'POST', 
-                        body: JSON.stringify({clientID: SECRET_CLIENT_ID}),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                if (token) {
+                    const response = await fetch(`/api/authenticated?token=${token}`, {
+                        method: 'GET',
                         credentials: 'include'
                     });
-                    let responseJSON = await response.json();
-                    token = responseJSON.token;
-                    localStorage.setItem('token', token);
+                    const responseJSON = await response.json();
+                    if (responseJSON.auth) {
+                        return token;
+                    }
                 }
+
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({clientID: SECRET_CLIENT_ID}),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                const responseJSON = await response.json();
+                token = responseJSON.token;
+                localStorage.setItem('token', token);
+                return token;
+            }
+            async function searchMovies() {
+                let token = await authenticate();
                 var movieTitle = document.getElementById('movieTitle').value;
                 es = new EventSource(`/api/search/movies?title=${movieTitle}&token=${token}`);
                 es.addEventListener('results', function (e) {
@@ -210,33 +223,20 @@
                     console.error(e.data);
                 });
             }
-             async function searchTV() {
-                  let token = localStorage.getItem('token');
-                    if (!token) {
-                        let response = await fetch('/api/login', {
-                            method: 'POST',
-                            body: JSON.stringify({ clientID: SECRET_CLIENT_ID }),
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            credentials: 'include'
-                        });
-                        let responseJSON = await response.json();
-                        token = responseJSON.token;
-                        localStorage.setItem('token', token);
-                    }
-                    var showTitle = document.getElementById('showTitle').value;
-                    var season = document.getElementById('season').value;
-                    var episode = document.getElementById('episode').value;
-                    
-                    es = new EventSource(`/api/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
-                    es.addEventListener('results', function (e) {
-                        console.log(e.data);
-                    });
-                    es.addEventListener('error', function (e) {
-                        console.error(e.data);
-                    });
-                }
+            async function searchTV() {
+                let token = await authenticate();
+                var showTitle = document.getElementById('showTitle').value;
+                var season = document.getElementById('season').value;
+                var episode = document.getElementById('episode').value;
+
+                es = new EventSource(`/api/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
+                es.addEventListener('results', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('error', function (e) {
+                    console.error(e.data);
+                });
+            }
             function stop() {
                 es.close();
             }

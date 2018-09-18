@@ -14,8 +14,9 @@ async function Afdah(req, sse) {
     const title = req.query.title;
     const season = padTvNumbers(req.query.season);
     const episode = padTvNumbers(req.query.episode);
-    
+
     const url = 'https://afdah.to';
+    const promises = [];
 
     try {
         const html = await rp({
@@ -48,12 +49,7 @@ async function Afdah(req, sse) {
         $ = cheerio.load(videoPageHtml);
 
         if($('#tabs').find('a[content="cont_1"]').text() === 'Watch TV') {
-            let episodeUrl = $(`a[href*="s${season}e${episode}"]`).attr('href') || $(`a[href*="s${season}e0${episode}"]`).attr('href') || $(`a[href*="e${episode}"]`).attr('href') || $(`a[href*="e0${episode}"]`).attr('href');
-
-            const episodePageHtml = await rp({
-                uri: `${url}${episodeUrl}`,
-                timeout: 5000
-            });
+            const episodeUrl = $(`a[href*="s${season}e${episode}"]`).attr('href') || $(`a[href*="s${season}e0${episode}"]`).attr('href') || $(`a[href*="e${episode}"]`).attr('href') || $(`a[href*="e0${episode}"]`).attr('href');
 
             const page = await browser.newPage();
             await page.goto(`${url}${episodeUrl}`);
@@ -76,6 +72,26 @@ async function Afdah(req, sse) {
             const provider = `${providerObject.protocol}//${providerObject.host}`;
             const videoSourceUrl = `${provider}/stream/${streamId}`;
             sse.send({videoSourceUrl, url, provider}, 'results');
+        } else {
+            const page = await browser.newPage();
+            await page.goto(`${url}${videoId}`);
+            await page.waitFor('.jw-player');
+            const sourceIds = await page.$$eval('.jw-player', serverTabs => serverTabs.map(serverTab => serverTab.dataset.id));
+
+            async function scrape(sourceId) {
+                await page.goto(`${url}${sourceId}`);
+                await page.waitFor('input[type="image"]');
+                await page.click('input[type="image"]');
+                await page.waitFor(2000);
+                const content = await page.content();
+                await page.screenshot({path: 'AfdahTV.png'})
+                const videoSourceUrl = await page.evaluate(() => window.player);
+                sse.send({videoSourceUrl, url, provider}, 'results');
+            }
+
+            sourceIds.filter(sourceId => !sourceId.startsWith('/trailer')).forEach(sourceId => {
+                promises.push(scrape(sourceId))
+            });
         }
     } catch (err) {
         console.log(err);
@@ -84,8 +100,9 @@ async function Afdah(req, sse) {
             sse.send({url, message: 'Looks like this provider is down.'}, 'error');
         }
     }
-    
+
     // Wait for all the scrapers to return before closing the browser
+    await Promise.all(promises);
     await browser.close();
 }
 
