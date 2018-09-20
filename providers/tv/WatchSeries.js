@@ -3,9 +3,10 @@ const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
+const logger = require('../../utils/logger')
 
 async function WatchSeries(req, sse) {
-    console.log(req.query)
+    logger.debug(req.query)
     const {show, season, episode} = req.query
 
     // These providers were in the Terarium source, but are now dead..... We need to find others
@@ -42,12 +43,12 @@ async function WatchSeries(req, sse) {
                 const episodeLink = videoPageParsed(el).find('a').attr('href');
                 episodeLinks.push(`${url}${episodeLink}`)
             })
-            const test = episodeLinks.filter((link) => {
+            const filteredEpisodes = episodeLinks.filter((link) => {
                 return link.includes(`s${season}_e${episode}`)
             })
 
             let allLinks = [];
-            let t = await _loadPageWithCheerio(test)
+            let t = await _loadPageWithCheerio(filteredEpisodes)
             t('.watch-btn').each((i, el) => {
                 const link = `${url}${t(el).attr('href')}`
                 allLinks.push(link)
@@ -72,16 +73,16 @@ async function WatchSeries(req, sse) {
                     
                 } catch (err)  {
                     if (err.message.includes('timeout')) {
-                        console.log(`${streamPageLink} has been taken down`)
+                        logger.info(`${streamPageLink} has been taken down`)
                     }
                 } finally {
                     browser.close()
                 }
             })
         } catch (err) {
-            console.error(err);            
+            logger.error(err);            
             if (err.cause && err.cause.code !== 'ETIMEDOUT') {
-                console.error(err);
+                logger.error(err); 
                 sse.send({ url, message: 'Looks like this provider is down.' }, 'error');
             }
         } 
