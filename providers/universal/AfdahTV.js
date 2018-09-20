@@ -82,10 +82,11 @@ async function Afdah(req, sse) {
                 await page.goto(`${url}${sourceId}`);
                 await page.waitFor('input[type="image"]');
                 await page.click('input[type="image"]');
-                await page.waitFor(2000);
+                await page.waitFor(5000);
                 const content = await page.content();
-                await page.screenshot({path: 'AfdahTV.png'})
-                const videoSourceUrl = await page.evaluate(() => window.player);
+                // await page.screenshot({path: 'AfdahTV.png'});
+                const videoSourceUrl = await page.evaluate(() => window.player && window.player.getPlaylist()[0].file);
+                console.log(videoSourceUrl);
                 sse.send({videoSourceUrl, url, provider}, 'results');
             }
 

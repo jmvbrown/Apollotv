@@ -1,4 +1,4 @@
-const providers = 
+const providers =
 	{
 		movies: [
 			require('./movies/Afdah'),
@@ -7,7 +7,7 @@ const providers =
 			// require('./tv/WatchSeries'),
 		],
 		universal: [
-			require('./universal/AfdahTV'),
+			// require('./universal/AfdahTV'),
 		]
 	}
 
