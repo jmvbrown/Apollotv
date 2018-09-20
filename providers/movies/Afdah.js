@@ -3,7 +3,6 @@ const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
-const beautify = require('js-beautify').js_beautify;
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
@@ -109,25 +108,52 @@ async function Afdah(req, sse) {
                     timeout: 5000
                 });
 
-                console.log(obfuscatedSources);
-
-                // const sources = beautify(obfuscatedSources, {eval_code: false});
-                var substring = obfuscatedSources.substring(obfuscatedSources.indexOf('eval(')+4, obfuscatedSources.lastIndexOf(')')+1)
+                var cleanedObfuscatedSources = obfuscatedSources
                     .replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`)
-                    .replace(`RegExp('\\b' + e(c) + '\\b', 'g')`, `RegExp('\\\\b' + e(c) + '\\\\b', 'g')`)
-                    .replace(/\\\//, `\\\\/`);
-                let func = new Function('return '+substring)();
+                    .replace(/\\/g, '\\\\');
 
-                console.log(func)
 
-                console.log(sources);
+                const vm = require('vm');
+                const sandbox = {window: {checkSrc: function(){}}}; // starting variables
+                vm.createContext(sandbox); // Contextify the sandbox.
+                vm.runInContext(cleanedObfuscatedSources, sandbox);
+                videoSourceUrl = sandbox.window.srcs[0].url;
 
-                // const page = await browser.newPage();
-                // await page.goto(videoStreamUrl);
-                // await page.waitFor(() => !!document.querySelector('video').src);
-                // const videoSrc = await page.$eval('video', video => video.src);
-                // await page.close();
-                // const videoSourceUrl = URL.parse(videoSrc, true).query.url;
+//                 await rp({
+//                     uri: videoSourceUrl,
+//                     method: 'OPTIONS',
+//                     headers: {
+//                         accept: 'text/html, */*; q=0.01',
+//                         'accept-language': 'en-US,en;q=0.9',
+//                         // 'accept-encoding': 'gzip, deflate, br',
+//                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+//                         dnt: 1,
+//                         origin: 'https://vidlink.org',
+//                         referer: videoStreamUrl,
+//                         'save-data': 'on',
+//                         'user-agent': userAgent,
+//                         'x-requested-with': 'XMLHttpRequest'
+//                     },
+//                     timeout: 5000
+//                 });
+//
+//                 await rp({
+//                     uri: videoSourceUrl,
+//                     method: 'HEAD',
+//                     headers: {
+//                         accept: 'text/html, */*; q=0.01',
+//                         'accept-language': 'en-US,en;q=0.9',
+//                         // 'accept-encoding': 'gzip, deflate, br',
+//                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+//                         dnt: 1,
+//                         origin: 'https://vidlink.org',
+//                         referer: videoStreamUrl,
+//                         'save-data': 'on',
+//                         'user-agent': userAgent,
+//                         'x-requested-with': 'XMLHttpRequest'
+//                     },
+//                     timeout: 5000
+//                 });
 
                 sse.send({videoSourceUrl, provider: url}, 'results');
             }
