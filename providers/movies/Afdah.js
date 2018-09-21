@@ -19,9 +19,9 @@ async function Afdah(req, sse) {
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
         try {
-            const usePlus = url === "https://putlockerhd.co"
+            const usePlus = url === "https://putlockerhd.co" || url === "https://genvideos.co";
             const html = await rp({
-                uri: `${url}/results?q=${usePlus ? movieTitle.replace(/ /, '+'): movieTitle}`,
+                uri: `${url}/results?q=${usePlus ? movieTitle.replace(/ /g, '+'): movieTitle.replace(/ /g, '%20')}`,
                 timeout: 5000
             });
 
@@ -104,13 +104,12 @@ async function Afdah(req, sse) {
                         postID,
                         id_view
                     },
-                    gzip: true,
+                    jar,
                     timeout: 5000
                 });
 
-                var cleanedObfuscatedSources = obfuscatedSources
-                    .replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`)
-                    .replace(/\\/g, '\\\\');
+                const cleanedObfuscatedSources = obfuscatedSources
+                    .replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`);
 
 
                 const vm = require('vm');
@@ -118,42 +117,7 @@ async function Afdah(req, sse) {
                 vm.createContext(sandbox); // Contextify the sandbox.
                 vm.runInContext(cleanedObfuscatedSources, sandbox);
                 videoSourceUrl = sandbox.window.srcs[0].url;
-
-//                 await rp({
-//                     uri: videoSourceUrl,
-//                     method: 'OPTIONS',
-//                     headers: {
-//                         accept: 'text/html, */*; q=0.01',
-//                         'accept-language': 'en-US,en;q=0.9',
-//                         // 'accept-encoding': 'gzip, deflate, br',
-//                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-//                         dnt: 1,
-//                         origin: 'https://vidlink.org',
-//                         referer: videoStreamUrl,
-//                         'save-data': 'on',
-//                         'user-agent': userAgent,
-//                         'x-requested-with': 'XMLHttpRequest'
-//                     },
-//                     timeout: 5000
-//                 });
-//
-//                 await rp({
-//                     uri: videoSourceUrl,
-//                     method: 'HEAD',
-//                     headers: {
-//                         accept: 'text/html, */*; q=0.01',
-//                         'accept-language': 'en-US,en;q=0.9',
-//                         // 'accept-encoding': 'gzip, deflate, br',
-//                         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-//                         dnt: 1,
-//                         origin: 'https://vidlink.org',
-//                         referer: videoStreamUrl,
-//                         'save-data': 'on',
-//                         'user-agent': userAgent,
-//                         'x-requested-with': 'XMLHttpRequest'
-//                     },
-//                     timeout: 5000
-//                 });
+                videoSourceSize = sandbox.window.srcs[0].size;
 
                 sse.send({videoSourceUrl, provider: url}, 'results');
             }
