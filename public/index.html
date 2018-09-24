@@ -252,11 +252,11 @@
                         token = responseJSON.token;
                         localStorage.setItem('token', token);
                     }
-                    var showname = document.getElementById('showname').value;
+                    var showTitle = document.getElementById('showTitle').value;
                     var season = document.getElementById('season').value;
                     var episode = document.getElementById('episode').value;
-                    
-                    es = new EventSource(`/api/search/tv?show=${showname}&season=${season}&episode=${episode}&token=${token}`)
+
+                    es = new EventSource(`/api/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
                     es.addEventListener('results', function (e) {
                         console.log(e.data);
                     });
