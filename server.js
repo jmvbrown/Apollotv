@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const api = require('./api');
 const verifyToken = require('./api');
+const morgan = require('morgan')
+const logger = require('./utils/logger')
 
 require('dotenv').config();
 
@@ -25,6 +27,8 @@ app.use(compression({filter: (req, res) => {
     return compression.filter(req, res)
 }}));
 
+app.use(morgan('combined', { stream: logger.stream }))
+
 app.get('/', function(req, res) {
     res.sendFile(`${pathToApp}/public/index.html`);
 });
@@ -32,6 +36,9 @@ app.get('/', function(req, res) {
 app.post('/api/login', api.login);
 app.get('/api/authenticated', api.authenticated);
 app.get('/api/search/movies', api.verifyToken, api.searchMovies);
+
+app.get('/api/search/tv', api.verifyToken, api.searchTv);
+
 
 app.get('/api/search/tv', api.verifyToken, api.searchTv);
 

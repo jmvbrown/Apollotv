@@ -23,10 +23,10 @@ Install node (v10.10.0) and npm (v6.4.1).
 - Search for the exact name of a movie, like `The Avengers`.
 - Open the developer console and watch the links arrive.
 
-Calling the TV API:
+Calling the Movie API:
 - URL: `127.0.0.1:3000/api/search`
-- Querystrings required: 
-    `queryString`: movie title (exact name)
+- Querystrings required: <br>
+    `queryString`: movie title (exact name) <br>
     `token`: valid JWT token
 
 
@@ -36,8 +36,8 @@ Calling the TV API:
 
 Calling the TV API:
 - URL: `127.0.0.1:3000/api/search/tv`
-- Querystrings required: 
-    `show`: name of show
-    `season`: season
-    `episode`: episode
+- Querystrings required: <br>
+    `show`: name of show <br>
+    `season`: season <br>
+    `episode`: episode <br>
     `token`: valid JWT token

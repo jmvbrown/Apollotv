@@ -63,6 +63,15 @@ function searchTv(req, res) {
     }
 }
 
+function searchTv(req, res) {
+    const sse = new SSE();
+    sse.init(req, res);
+
+    for (let provider of providers.tv) {
+        provider(req, sse);
+    }
+}
+
 exports.login = login;
 exports.verifyToken = verifyToken;
 exports.authenticated = authenticated;
