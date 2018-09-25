@@ -48,7 +48,7 @@ async function Afdah(req, sse) {
             if (regexMatches.length === 2) {
                 let videoStreamUrl = `https:${regexMatches[1]}`;
 
-                var jar = rp.jar();
+                const jar = rp.jar();
                 const videoPageHtml = await rp({
                     uri: videoStreamUrl,
                     jar,
