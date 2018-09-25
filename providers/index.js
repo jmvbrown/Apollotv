@@ -5,9 +5,9 @@ const providers =
 		],
 		tv: [
 			require('./tv/WatchSeries'),
+			require('./tv/AfdahTV'),
 		],
 		universal: [
-			require('./universal/AfdahTV'),
 		]
 	}
 
