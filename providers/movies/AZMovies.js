@@ -12,9 +12,6 @@ const Streamango = require('../../resolvers/Streamango');
 async function AZMovies(req, sse) {
     const movieTitle = req.query.title;
 
-    // Start up the headless browser in no-sandbox mode to make it truly headless
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
-
     // These are all the same host I think. https://xmovies8.org isn't loading.
     const urls = ["https://azmovies.xyz"];
     const promises = [];
@@ -114,11 +111,7 @@ async function AZMovies(req, sse) {
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
-    })
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
-    await browser.close();
+    });
 }
 
 module.exports = exports = AZMovies;
