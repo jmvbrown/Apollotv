@@ -145,10 +145,7 @@ async function Afdah(req, sse) {
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
-    })
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
+    });
 }
 
 module.exports = exports = Afdah;

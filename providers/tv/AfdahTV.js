@@ -9,9 +9,6 @@ const Openload = require('../../resolvers/Openload');
 const padTvNumbers = require("../../utils/padTvNumbers");
 
 async function AfdahTV(req, sse) {
-    // Start up the headless browser in no-sandbox mode to make it truly headless
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
-
     const title = req.query.title;
     const season = padTvNumbers(req.query.season);
     const episode = padTvNumbers(req.query.episode);
@@ -23,6 +20,10 @@ async function AfdahTV(req, sse) {
     try {
         const html = await rp({
             uri: `${url}/wp-content/themes/afdah/ajax-search2.php`,
+            headers: {
+                'x-real-ip': req.client.remoteAddress,
+                'x-forwarded-for': req.client.remoteAddress
+            },
             method: 'POST',
             form: {
                 process: AES.encrypt(title + '|||' + 'title', "Watch Movies Online").toString()
@@ -46,6 +47,10 @@ async function AfdahTV(req, sse) {
 
         const videoPageHtml = await rp({
             uri: `${url}${videoId}`,
+            headers: {
+                'x-real-ip': req.client.remoteAddress,
+                'x-forwarded-for': req.client.remoteAddress
+            },
             jar,
             timeout: 5000
         });
@@ -57,6 +62,10 @@ async function AfdahTV(req, sse) {
 
             const videoPageHtml = await rp({
                 uri: `${url}${episodeUrl}`,
+                headers: {
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
+                },
                 jar,
                 timeout: 5000
             });
@@ -71,6 +80,10 @@ async function AfdahTV(req, sse) {
                     const videoPageHtml = await rp({
                         uri: `${url}${serverUrl}`,
                         method: 'POST',
+                        headers: {
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
+                        },
                         formData: {
                             play: 'continue',
                             x: 715,
@@ -136,10 +149,6 @@ async function AfdahTV(req, sse) {
             sse.send({url, message: 'Looks like this provider is down.'}, 'error');
         }
     }
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
-    await browser.close();
 }
 
 function tor(txt) {
