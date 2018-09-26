@@ -3,14 +3,12 @@ const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
-const AES = require("crypto-js/aes");
+const AES = require('crypto-js/aes');
 
+const Openload = require('../../resolvers/Openload');
 const padTvNumbers = require("../../utils/padTvNumbers");
 
 async function AfdahTV(req, sse) {
-    // Start up the headless browser in no-sandbox mode to make it truly headless
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
-
     const title = req.query.title;
     const season = padTvNumbers(req.query.season);
     const episode = padTvNumbers(req.query.episode);
@@ -22,6 +20,10 @@ async function AfdahTV(req, sse) {
     try {
         const html = await rp({
             uri: `${url}/wp-content/themes/afdah/ajax-search2.php`,
+            headers: {
+                'x-real-ip': req.client.remoteAddress,
+                'x-forwarded-for': req.client.remoteAddress
+            },
             method: 'POST',
             form: {
                 process: AES.encrypt(title + '|||' + 'title', "Watch Movies Online").toString()
@@ -45,6 +47,10 @@ async function AfdahTV(req, sse) {
 
         const videoPageHtml = await rp({
             uri: `${url}${videoId}`,
+            headers: {
+                'x-real-ip': req.client.remoteAddress,
+                'x-forwarded-for': req.client.remoteAddress
+            },
             jar,
             timeout: 5000
         });
@@ -56,6 +62,10 @@ async function AfdahTV(req, sse) {
 
             const videoPageHtml = await rp({
                 uri: `${url}${episodeUrl}`,
+                headers: {
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
+                },
                 jar,
                 timeout: 5000
             });
@@ -70,6 +80,10 @@ async function AfdahTV(req, sse) {
                     const videoPageHtml = await rp({
                         uri: `${url}${serverUrl}`,
                         method: 'POST',
+                        headers: {
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
+                        },
                         formData: {
                             play: 'continue',
                             x: 715,
@@ -101,61 +115,8 @@ async function AfdahTV(req, sse) {
                     const decode = tor(Buffer.from(tor(code), 'base64').toString('ascii'));
                     const providerUrl = /(?:src=')(.*)(?:' scrolling)/g.exec(decode)[1];
 
-                    let providerPageHtml = await rp({
-                        uri: providerUrl,
-                        jar,
-                        timeout: 5000
-                    });
-
-                    $ = cheerio.load(providerPageHtml);
-
-                    const fileid = /(?:>window.fileid=")(.*)(?:";)/g.exec(providerPageHtml)[1];
-                    let wholeFileId = ''
-                    const jQuery = function(selector, anotherArg) {
-                        return {
-                            $(selector) {
-                                return $(selector);
-                            },
-                            ready(f) {
-                                f();
-                            },
-                            text(t) {
-                                if (!t) {
-                                    return $('p').first().text();
-                                }
-                                wholeFileId = t;
-                            },
-                            click() {}
-                        }
-                    };
-                    const vm = require('vm');
-                    // starting variables
-                    const sandbox = {
-                        $: jQuery,
-                        jQuery,
-                        document: {
-                            createTextNode: "function createTextNode() { [native code] }",
-                            getElementById: "function getElementById() { [native code] }",
-                            write: "function write() { [native code] }",
-                            documentElement: {
-                                getAttribute(attribute) {
-                                    return null;
-                                }
-                            }
-                        },
-                        window: {
-                        },
-                        sin: Math.sin,
-                        navigator: {
-                            userAgent: ''
-                        },
-                        ffff: $('p').first().attr('id')
-                    };
-                    vm.createContext(sandbox); // Contextify the sandbox.
-                    vm.runInContext($('script').last()[0].children[0].data, sandbox);
-
-                    videoSourceUrl = `https://openload.co/stream/${wholeFileId}?mime=true`;
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', localServer: true}, 'results');
+                    const videoSourceUrl = await Openload(providerUrl, jar);
+                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
                 });
         } else {
             // Not working because the stream is a .m3u8 and I haven't found a player that will work.
@@ -188,10 +149,6 @@ async function AfdahTV(req, sse) {
             sse.send({url, message: 'Looks like this provider is down.'}, 'error');
         }
     }
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
-    await browser.close();
 }
 
 function tor(txt) {

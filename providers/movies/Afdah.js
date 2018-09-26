@@ -2,15 +2,11 @@ const URL = require('url');
 const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
 async function Afdah(req, sse) {
     const movieTitle = req.query.title;
-
-    // Start up the headless browser in no-sandbox mode to make it truly headless
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
 
     // These are all the same host I think. https://xmovies8.org isn't loading.
     const urls = ["https://afdah.org", "https://genvideos.com", "https://genvideos.co", "https://watch32hd.co", "https://putlockerhd.co", "https://xmovies8.org"];
@@ -19,11 +15,26 @@ async function Afdah(req, sse) {
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
         try {
-            const usePlus = url === "https://putlockerhd.co" || url === "https://genvideos.co";
-            const html = await rp({
-                uri: `${url}/results?q=${usePlus ? movieTitle.replace(/ /g, '+'): movieTitle.replace(/ /g, '%20')}`,
-                timeout: 5000
-            });
+            let html = '';
+
+            try {
+                html = await rp({
+                    uri: `${url}/results?q=${movieTitle.toLowerCase().replace(/ /g, '%20').replace(/\:/g, '')}`,
+                    timeout: 5000
+                });
+            } catch(err) {
+                try {
+                    html = await rp({
+                        uri: `${url}/results?q=${movieTitle.toLowerCase().replace(/ /g, '+').replace(/\:/g, '')}`,
+                        timeout: 5000
+                    });
+                } catch(err) {
+                    html = await rp({
+                        uri: `${url}/results?q=${movieTitle.toLowerCase().replace(/ /g, '%2B').replace(/\:/g, '')}`,
+                        timeout: 5000
+                    });
+                }
+            }
 
             let $ = cheerio.load(html);
             let videoId = '';
@@ -48,15 +59,14 @@ async function Afdah(req, sse) {
             if (regexMatches.length === 2) {
                 let videoStreamUrl = `https:${regexMatches[1]}`;
 
-                var jar = rp.jar();
+                const jar = rp.jar();
                 const videoPageHtml = await rp({
                     uri: videoStreamUrl,
                     jar,
                     timeout: 5000
                 });
 
-                // const userAgent = randomUseragent.getRandom();
-                const userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44';
+                const userAgent = randomUseragent.getRandom();
 
                 const postID = /(?:var postID = ')(.*)(?:';)/.exec(videoPageHtml)[1];
                 const viewData = await rp({
@@ -135,11 +145,7 @@ async function Afdah(req, sse) {
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
-    })
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
-    await browser.close();
+    });
 }
 
 module.exports = exports = Afdah;
