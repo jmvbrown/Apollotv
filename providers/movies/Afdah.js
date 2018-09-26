@@ -66,8 +66,7 @@ async function Afdah(req, sse) {
                     timeout: 5000
                 });
 
-                // const userAgent = randomUseragent.getRandom();
-                const userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44';
+                const userAgent = randomUseragent.getRandom();
 
                 const postID = /(?:var postID = ')(.*)(?:';)/.exec(videoPageHtml)[1];
                 const viewData = await rp({
