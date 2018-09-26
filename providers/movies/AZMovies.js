@@ -9,7 +9,7 @@ const randomUseragent = require('random-useragent');
 const Openload = require('../../resolvers/Openload');
 const Streamango = require('../../resolvers/Streamango');
 
-async function Afdah(req, sse) {
+async function AZMovies(req, sse) {
     const movieTitle = req.query.title;
 
     // Start up the headless browser in no-sandbox mode to make it truly headless
@@ -31,7 +31,9 @@ async function Afdah(req, sse) {
                     dnt: 1,
                     referer: 'https://azmovies.xyz/check.php?url=https://azmovies.xyz/watch.php?title=The%20Avengers',
                     'save-data': 'on',
-                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44'
+                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44',
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
                 },
                 jar,
                 followAllRedirects: true,
@@ -51,7 +53,9 @@ async function Afdah(req, sse) {
                     dnt: 1,
                     referer: 'https://azmovies.xyz/check.php?url=https://azmovies.xyz/watch.php?title=The%20Avengers',
                     'save-data': 'on',
-                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44'
+                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44',
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
                 },
                 jar,
                 timeout: 5000
@@ -62,10 +66,10 @@ async function Afdah(req, sse) {
             $('#serverul li a').toArray().forEach(async (element) => {
                 const providerUrl = $(element).attr('href');
                 if (providerUrl.startsWith('https://openload.co/embed')) {
-                    const videoSourceUrl = await Openload(providerUrl, jar);
+                    const videoSourceUrl = await Openload(providerUrl, jar, req.client.remoteAddress);
                     sse.send({videoSourceUrl, url, provider: 'https://openload.co', localServer: true}, 'results');
                 } else if (providerUrl.startsWith('https://streamango.com/embed')) {
-                    const videoSourceUrl = await Streamango(providerUrl, jar);
+                    const videoSourceUrl = await Streamango(providerUrl, jar, req.client.remoteAddress);
                     sse.send({videoSourceUrl, url, provider: 'https://streamango.com', localServer: true}, 'results');
                 } else {
                     const videoPageHtml = await rp({
@@ -74,7 +78,9 @@ async function Afdah(req, sse) {
                             dnt: 1,
                             referer: 'https://azmovies.xyz/check.php?url=https://azmovies.xyz/watch.php?title=The%20Avengers',
                             'save-data': 'on',
-                            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44'
+                            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36 OPR/55.0.2994.44',
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
                         },
                         jar,
                         timeout: 5000
@@ -198,4 +204,4 @@ async function Afdah(req, sse) {
     await browser.close();
 }
 
-module.exports = exports = Afdah;
+module.exports = exports = AZMovies;
