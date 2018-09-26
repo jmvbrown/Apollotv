@@ -67,10 +67,10 @@ async function AZMovies(req, sse) {
                 const providerUrl = $(element).attr('href');
                 if (providerUrl.startsWith('https://openload.co/embed')) {
                     const videoSourceUrl = await Openload(providerUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', localServer: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
                 } else if (providerUrl.startsWith('https://streamango.com/embed')) {
                     const videoSourceUrl = await Streamango(providerUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://streamango.com', localServer: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://streamango.com', ipLocked: true}, 'results');
                 } else {
                     const videoPageHtml = await rp({
                         uri: providerUrl,

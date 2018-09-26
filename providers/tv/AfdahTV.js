@@ -103,7 +103,7 @@ async function AfdahTV(req, sse) {
                     const providerUrl = /(?:src=')(.*)(?:' scrolling)/g.exec(decode)[1];
 
                     const videoSourceUrl = await Openload(providerUrl, jar);
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', localServer: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
                 });
         } else {
             // Not working because the stream is a .m3u8 and I haven't found a player that will work.

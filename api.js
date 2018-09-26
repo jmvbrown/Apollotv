@@ -49,18 +49,14 @@ function searchMovies(req, res) {
     const sse = new SSE();
     sse.init(req, res);
 
-    for (let provider of [...providers.movies, ...providers.universal]) {
-        provider(req, sse);
-    }
+    [...providers.movies, ...providers.universal].forEach(provider => provider(req, sse));
 }
 
 function searchTv(req, res) {
     const sse = new SSE();
     sse.init(req, res);
 
-    for (let provider of [...providers.tv, ...providers.universal]) {
-        provider(req, sse);
-    }
+    [...providers.tv, ...providers.universal].forEach(provider => provider(req, sse));
 }
 
 exports.login = login;
