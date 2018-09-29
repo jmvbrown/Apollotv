@@ -1,8 +1,5 @@
-const URL = require('url');
-const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 

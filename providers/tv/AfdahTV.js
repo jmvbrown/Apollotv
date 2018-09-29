@@ -1,8 +1,5 @@
-const URL = require('url');
-const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
 const AES = require('crypto-js/aes');
 
 const Openload = require('../../resolvers/Openload');
@@ -72,7 +69,7 @@ async function AfdahTV(req, sse) {
 
             $ = cheerio.load(videoPageHtml);
 
-            const serverUrls = $('.jw-player')
+            $('.jw-player')
                 .toArray()
                 .map(player => $(player).data().id)
                 .filter(serverUrl => !serverUrl.includes('trailer'))
