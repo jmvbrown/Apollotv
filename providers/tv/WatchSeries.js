@@ -1,7 +1,9 @@
 const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
+const randomUseragent = require('random-useragent');
+
+const Openload = require('../../resolvers/Openload');
 
 async function WatchSeries(req, sse) {
     const showTitle = req.query.title;
@@ -17,8 +19,16 @@ async function WatchSeries(req, sse) {
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
         try {
+            const jar = rp.jar();
+            const userAgent = randomUseragent.getRandom();
             const html = await rp({
-                uri: `${url}/search/${showTitle.replace(/ /, '%20').replace(/ \(.*\)/, '')}`,
+                uri: `${url}/search/${showTitle.replace(/ \(.*\)/, '').replace(/ /, '%20')}`,
+                headers: {
+                    'user-agent': userAgent,
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
+                },
+                jar,
                 timeout: 5000
             });
 
@@ -35,15 +45,21 @@ async function WatchSeries(req, sse) {
             })
 
             const videoPageHtml = await rp({
-                uri: `${url}/search/${showTitle.replace(/ /, '%20').replace(/ \(.*\)/, '')}`,
+                uri: showUrl,
+                headers: {
+                    'user-agent': userAgent,
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
+                },
+                jar,
                 timeout: 5000
             });
 
             $ = cheerio.load(videoPageHtml);
 
             let episodeUrl = '';
-            $('.sinfo').some(element => {
-                if ($(element).text() === `${season}x${episode}`) {
+            $('.sinfo').toArray().some(element => {
+                if ($(element).text() === `${season}×${episode}`) {
                     episodeUrl = `${url}${$(element).parent().attr('href')}`;
                     return true;
                 }
@@ -52,29 +68,56 @@ async function WatchSeries(req, sse) {
 
             const episodePageHtml = await await rp({
                 uri: episodeUrl,
+                headers: {
+                    'user-agent': userAgent,
+                    'x-real-ip': req.client.remoteAddress,
+                    'x-forwarded-for': req.client.remoteAddress
+                },
+                jar,
                 timeout: 5000
             });
 
             $ = cheerio.load(episodePageHtml);
 
-            const videoUrls = [];
-
-            $('.watch-btn').each(element => {
-                videoUrls.push(`${url}${$(element).attr('href')}`);
-            });
+            const videoUrls = $('.watch-btn').toArray().map(element => `${url}${$(element).attr('href')}`);
 
             videoUrls.forEach(async (videoUrl) => {
-                const videoPageHtml = await await rp({
-                    uri: videoUrl,
-                    timeout: 5000
-                });
+                try {
+                    const videoPageHtml = await await rp({
+                        uri: videoUrl,
+                        headers: {
+                            'user-agent': userAgent,
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
+                        },
+                        jar,
+                        timeout: 5000
+                    });
 
-                $ = cheerio.load(videoPageHtml);
+                    $ = cheerio.load(videoPageHtml);
 
-                const streamPageUrl = $('.action-btn').attr('href');
+                    const streamPageUrl = $('.action-btn').attr('href');
 
-                if (streamPageUrl.startsWith('https://openload.co')) {
-                    // get the embed link and do what I do in AZMovies
+                    if (streamPageUrl.includes('openload.co')) {
+                        const path = streamPageUrl.split('/');
+                        const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
+                        sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
+                    } else if (streamPageUrl.includes('vidlox.me')) {
+                        const videoSourceHtml = await await rp({
+                            uri: streamPageUrl,
+                            headers: {
+                                'user-agent': userAgent,
+                                'x-real-ip': req.client.remoteAddress,
+                                'x-forwarded-for': req.client.remoteAddress
+                            },
+                            jar,
+                            timeout: 5000
+                        });
+                        const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
+                        videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'))
+                    }
+                } catch(err) {
+                    console.log(`No source found at ${videoUrl}`);
                 }
             })
         } catch (err) {
