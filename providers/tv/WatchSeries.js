@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
+const vm = require('vm');
 
 const Openload = require('../../resolvers/Openload');
 
@@ -66,7 +67,7 @@ async function WatchSeries(req, sse) {
                 return false;
             });
 
-            const episodePageHtml = await await rp({
+            const episodePageHtml = await rp({
                 uri: episodeUrl,
                 headers: {
                     'user-agent': userAgent,
@@ -83,7 +84,7 @@ async function WatchSeries(req, sse) {
 
             videoUrls.forEach(async (videoUrl) => {
                 try {
-                    const videoPageHtml = await await rp({
+                    const videoPageHtml = await rp({
                         uri: videoUrl,
                         headers: {
                             'user-agent': userAgent,
@@ -98,12 +99,12 @@ async function WatchSeries(req, sse) {
 
                     const streamPageUrl = $('.action-btn').attr('href');
 
-                    if (streamPageUrl.includes('openload.co')) {
+                    if (false && streamPageUrl.includes('openload.co')) {
                         const path = streamPageUrl.split('/');
                         const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
                         sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
-                    } else if (streamPageUrl.includes('vidlox.me')) {
-                        const videoSourceHtml = await await rp({
+                    } else if (false && streamPageUrl.includes('vidlox.me')) {
+                        const videoSourceHtml = await rp({
                             uri: streamPageUrl,
                             headers: {
                                 'user-agent': userAgent,
@@ -115,6 +116,57 @@ async function WatchSeries(req, sse) {
                         });
                         const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
                         videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'))
+                    } else if (false && streamPageUrl.includes('vshare.eu')) {
+                        const path = streamPageUrl.split('/');
+                        const videoId = path[path.length - 1].replace('.htm', '');
+                        const videoSourceHtml = await rp({
+                            uri: `https://vshare.eu/embed-${videoId}-729x400.html`,
+                            headers: {
+                                'user-agent': userAgent
+                            },
+                            jar,
+                            timeout: 5000
+                        });
+
+                        $ = cheerio.load(videoSourceHtml);
+
+                        sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results')
+                    } else if (false && streamPageUrl.includes('speedvid.net')) {
+                        const path = streamPageUrl.split('/');
+                        const videoId = path[path.length - 1];
+                        const videoPageHtml = await rp({
+                            uri: `http://www.speedvid.net/embed-${videoId}-1280x720.html`,
+                            headers: {
+                                'user-agent': userAgent
+                            },
+                            jar,
+                            followAllRedirects: true,
+                            timeout: 5000
+                        });
+
+                        $ = cheerio.load(videoPageHtml);
+
+                        // starting variables
+                        let videoSourcePageUrl = '';
+                        const sandbox = {location: {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}}};
+                        vm.createContext(sandbox); // Contextify the sandbox.
+                        // vm.runInContext($('script').last()[0].children[0].data, sandbox);
+                        vm.runInContext($('script').last()[0].children[0].data, sandbox);
+
+                        const videoSourceHtml = await rp({
+                            uri: videoSourcePageUrl,
+                            headers: {
+                                'user-agent': userAgent
+                            },
+                            jar,
+                            timeout: 5000
+                        });
+
+                        $ = cheerio.load(videoSourceHtml);
+
+                        const videoSourceUrl = $('source').attr('src');
+
+                        sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results')
                     }
                 } catch(err) {
                     console.log(`No source found at ${videoUrl}`);
