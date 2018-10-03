@@ -99,95 +99,115 @@ async function WatchSeries(req, sse) {
 
                     const streamPageUrl = $('.action-btn').attr('href');
 
-                    if (false && streamPageUrl.includes('openload.co')) {
-                        const path = streamPageUrl.split('/');
-                        const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
-                        sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
-                    } else if (false && streamPageUrl.includes('vidlox.me')) {
-                        const videoSourceHtml = await rp({
+                    if (streamPageUrl.includes('openload.co')) {
+                        // const path = streamPageUrl.split('/');
+                        // const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
+                        // sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
+                    } else if (streamPageUrl.includes('vidlox.me')) {
+                        // const videoSourceHtml = await rp({
+                        //     uri: streamPageUrl,
+                        //     headers: {
+                        //         'user-agent': userAgent,
+                        //         'x-real-ip': req.client.remoteAddress,
+                        //         'x-forwarded-for': req.client.remoteAddress
+                        //     },
+                        //     jar,
+                        //     timeout: 5000
+                        // });
+                        // const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
+                        // videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'))
+                    } else if (streamPageUrl.includes('vshare.eu')) {
+//                         const path = streamPageUrl.split('/');
+//                         const videoId = path[path.length - 1].replace('.htm', '');
+//                         const videoSourceHtml = await rp({
+//                             uri: `https://vshare.eu/embed-${videoId}-729x400.html`,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoSourceHtml);
+//
+//                         sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results')
+                    } else if (streamPageUrl.includes('speedvid.net')) {
+//                         const path = streamPageUrl.split('/');
+//                         const videoId = path[path.length - 1];
+//                         const videoPageHtml = await rp({
+//                             uri: `http://www.speedvid.net/embed-${videoId}-1280x720.html`,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             followAllRedirects: true,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoPageHtml);
+//
+//                         // starting variables
+//                         let videoSourcePageUrl = '';
+//                         const sandbox = {location: {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}}};
+//                         vm.createContext(sandbox); // Contextify the sandbox.
+//                         vm.runInContext($('script').last()[0].children[0].data, sandbox);
+//
+//                         const videoSourceHtml = await rp({
+//                             uri: videoSourcePageUrl,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoSourceHtml);
+//
+//                         const videoSourceUrl = $('source').attr('src');
+//
+//                         sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results')
+                    } else if (streamPageUrl.includes('vidcloud.co')) {
+//                         const path = streamPageUrl.split('/');
+//                         const videoId = path[path.length - 2];
+//                         const videoSourceObject = await rp({
+//                             uri: `https://vidcloud.co/player?fid=${videoId}&page=video`,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             json: true,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoSourceObject.html);
+//
+//                         const sandbox = {jwplayer(){ return {setup(){}, on(){}, addButton(){}} }, $(){}};
+//                         vm.createContext(sandbox); // Contextify the sandbox.
+//                         vm.runInContext($('script').last()[0].children[0].data, sandbox);
+//
+//                         const videoSourceUrl = sandbox.config.sources[0].file;
+//
+//                         sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
+                    } else if (streamPageUrl.includes('clipwatching.com')) {
+                        const videoPageHtml = await rp({
                             uri: streamPageUrl,
                             headers: {
-                                'user-agent': userAgent,
-                                'x-real-ip': req.client.remoteAddress,
-                                'x-forwarded-for': req.client.remoteAddress
-                            },
-                            jar,
-                            timeout: 5000
-                        });
-                        const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
-                        videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'))
-                    } else if (false && streamPageUrl.includes('vshare.eu')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1].replace('.htm', '');
-                        const videoSourceHtml = await rp({
-                            uri: `https://vshare.eu/embed-${videoId}-729x400.html`,
-                            headers: {
                                 'user-agent': userAgent
                             },
                             jar,
-                            timeout: 5000
-                        });
-
-                        $ = cheerio.load(videoSourceHtml);
-
-                        sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results')
-                    } else if (false && streamPageUrl.includes('speedvid.net')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1];
-                        const videoPageHtml = await rp({
-                            uri: `http://www.speedvid.net/embed-${videoId}-1280x720.html`,
-                            headers: {
-                                'user-agent': userAgent
-                            },
-                            jar,
-                            followAllRedirects: true,
                             timeout: 5000
                         });
 
                         $ = cheerio.load(videoPageHtml);
 
-                        // starting variables
-                        let videoSourcePageUrl = '';
-                        const sandbox = {location: {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}}};
+                        let setupObject = {};
+                        const sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }, onTime(){}, onPlay(){}, onComplete(){}, onReady(){}} }};
                         vm.createContext(sandbox); // Contextify the sandbox.
-                        vm.runInContext($('script').last()[0].children[0].data, sandbox);
+                        vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
 
-                        const videoSourceHtml = await rp({
-                            uri: videoSourcePageUrl,
-                            headers: {
-                                'user-agent': userAgent
-                            },
-                            jar,
-                            timeout: 5000
+                        setupObject.sources.forEach((source) => {
+                            sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results')
                         });
-
-                        $ = cheerio.load(videoSourceHtml);
-
-                        const videoSourceUrl = $('source').attr('src');
-
-                        sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results')
-                    } else if (streamPageUrl.includes('vidcloud.co')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 2];
-                        const videoSourceObject = await rp({
-                            uri: `https://vidcloud.co/player?fid=${videoId}&page=video`,
-                            headers: {
-                                'user-agent': userAgent
-                            },
-                            jar,
-                            json: true,
-                            timeout: 5000
-                        });
-
-                        $ = cheerio.load(videoSourceObject.html);
-
-                        const sandbox = {jwplayer(){ return {setup(){}, on(){}, addButton(){}} }, $(){}};
-                        vm.createContext(sandbox); // Contextify the sandbox.
-                        vm.runInContext($('script').last()[0].children[0].data, sandbox);
-
-                        const videoSourceUrl = sandbox.config.sources[0].file;
-
-                        sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
                     }
