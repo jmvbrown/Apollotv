@@ -209,10 +209,25 @@ async function WatchSeries(req, sse) {
 //                             sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results')
 //                         });
                     } else if (streamPageUrl.includes('estream.to') || streamPageUrl.includes('estream.xyz')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1];
+//                         const path = streamPageUrl.split('/');
+//                         const videoId = path[path.length - 1];
+//                         const videoPageHtml = await rp({
+//                             uri: `http://estream.xyz/embed-${videoId}`,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoPageHtml);
+//
+//                         $('source').toArray().forEach((sourceElement) => {
+//                             sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results')
+//                         });
+                    } else if (streamPageUrl.includes('vidzi.online')) {
                         const videoPageHtml = await rp({
-                            uri: `http://estream.xyz/embed-${videoId}`,
+                            uri: streamPageUrl,
                             headers: {
                                 'user-agent': userAgent
                             },
@@ -222,8 +237,13 @@ async function WatchSeries(req, sse) {
 
                         $ = cheerio.load(videoPageHtml);
 
-                        $('source').toArray().forEach((sourceElement) => {
-                            sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results')
+                        let setupObject = {};
+                        const sandbox = {window: {}, jwplayer(){ return {setup(value){ setupObject = value; }, on(){}} }};
+                        vm.createContext(sandbox); // Contextify the sandbox.
+                        vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+
+                        setupObject.sources.forEach((source) => {
+                            sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results')
                         });
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
