@@ -226,25 +226,29 @@ async function WatchSeries(req, sse) {
 //                             sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results')
 //                         });
                     } else if (streamPageUrl.includes('vidzi.online')) {
-                        const videoPageHtml = await rp({
-                            uri: streamPageUrl,
-                            headers: {
-                                'user-agent': userAgent
-                            },
-                            jar,
-                            timeout: 5000
-                        });
-
-                        $ = cheerio.load(videoPageHtml);
-
-                        let setupObject = {};
-                        const sandbox = {window: {}, jwplayer(){ return {setup(value){ setupObject = value; }, on(){}} }};
-                        vm.createContext(sandbox); // Contextify the sandbox.
-                        vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
-
-                        setupObject.sources.forEach((source) => {
-                            sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results')
-                        });
+//                         const videoPageHtml = await rp({
+//                             uri: streamPageUrl,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoPageHtml);
+//
+//                         let setupObject = {};
+//                         const sandbox = {window: {}, jwplayer(){ return {setup(value){ setupObject = value; }, on(){}} }};
+//                         vm.createContext(sandbox); // Contextify the sandbox.
+//                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+//
+//                         setupObject.sources.forEach((source) => {
+//                             sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results')
+//                         });
+                    } else if (streamPageUrl.includes('vidto.me')) {
+                        console.log('Skipping vidoto.me because the links are always broken.')
+                    } else if (streamPageUrl.includes('vidto.me')) {
+                        console.log('Skipping vidoto.me because the links are always broken.')
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
                     }
