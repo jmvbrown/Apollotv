@@ -189,8 +189,30 @@ async function WatchSeries(req, sse) {
 //
 //                         sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
                     } else if (streamPageUrl.includes('clipwatching.com')) {
+//                         const videoPageHtml = await rp({
+//                             uri: streamPageUrl,
+//                             headers: {
+//                                 'user-agent': userAgent
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoPageHtml);
+//
+//                         let setupObject = {};
+//                         const sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }, onTime(){}, onPlay(){}, onComplete(){}, onReady(){}} }};
+//                         vm.createContext(sandbox); // Contextify the sandbox.
+//                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+//
+//                         setupObject.sources.forEach((source) => {
+//                             sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results')
+//                         });
+                    } else if (streamPageUrl.includes('estream.to') || streamPageUrl.includes('estream.xyz')) {
+                        const path = streamPageUrl.split('/');
+                        const videoId = path[path.length - 1];
                         const videoPageHtml = await rp({
-                            uri: streamPageUrl,
+                            uri: `http://estream.xyz/embed-${videoId}`,
                             headers: {
                                 'user-agent': userAgent
                             },
@@ -200,13 +222,8 @@ async function WatchSeries(req, sse) {
 
                         $ = cheerio.load(videoPageHtml);
 
-                        let setupObject = {};
-                        const sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }, onTime(){}, onPlay(){}, onComplete(){}, onReady(){}} }};
-                        vm.createContext(sandbox); // Contextify the sandbox.
-                        vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
-
-                        setupObject.sources.forEach((source) => {
-                            sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results')
+                        $('source').toArray().forEach((sourceElement) => {
+                            sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results')
                         });
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
