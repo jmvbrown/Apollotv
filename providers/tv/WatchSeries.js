@@ -150,7 +150,6 @@ async function WatchSeries(req, sse) {
                         let videoSourcePageUrl = '';
                         const sandbox = {location: {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}}};
                         vm.createContext(sandbox); // Contextify the sandbox.
-                        // vm.runInContext($('script').last()[0].children[0].data, sandbox);
                         vm.runInContext($('script').last()[0].children[0].data, sandbox);
 
                         const videoSourceHtml = await rp({
@@ -166,7 +165,31 @@ async function WatchSeries(req, sse) {
 
                         const videoSourceUrl = $('source').attr('src');
 
-                        sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results')
+                        sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results')
+                    } else if (streamPageUrl.includes('vidcloud.co')) {
+                        const path = streamPageUrl.split('/');
+                        const videoId = path[path.length - 2];
+                        const videoSourceObject = await rp({
+                            uri: `https://vidcloud.co/player?fid=${videoId}&page=video`,
+                            headers: {
+                                'user-agent': userAgent
+                            },
+                            jar,
+                            json: true,
+                            timeout: 5000
+                        });
+
+                        $ = cheerio.load(videoSourceObject.html);
+
+                        const sandbox = {jwplayer(){ return {setup(){}, on(){}, addButton(){}} }, $(){}};
+                        vm.createContext(sandbox); // Contextify the sandbox.
+                        vm.runInContext($('script').last()[0].children[0].data, sandbox);
+
+                        const videoSourceUrl = sandbox.config.sources[0].file;
+
+                        sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
+                    } else {
+                        console.log('Still need a resolver for', streamPageUrl);
                     }
                 } catch(err) {
                     console.log(`No source found at ${videoUrl}`);
