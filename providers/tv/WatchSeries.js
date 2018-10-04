@@ -115,7 +115,7 @@ async function WatchSeries(req, sse) {
                         //     timeout: 5000
                         // });
                         // const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
-                        // videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'))
+                        // videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'));
                     } else if (streamPageUrl.includes('vshare.eu')) {
 //                         const path = streamPageUrl.split('/');
 //                         const videoId = path[path.length - 1].replace('.htm', '');
@@ -130,7 +130,7 @@ async function WatchSeries(req, sse) {
 //
 //                         $ = cheerio.load(videoSourceHtml);
 //
-//                         sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results')
+//                         sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results');
                     } else if (streamPageUrl.includes('speedvid.net')) {
 //                         const path = streamPageUrl.split('/');
 //                         const videoId = path[path.length - 1];
@@ -165,7 +165,7 @@ async function WatchSeries(req, sse) {
 //
 //                         const videoSourceUrl = $('source').attr('src');
 //
-//                         sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results')
+//                         sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results');
                     } else if (streamPageUrl.includes('vidcloud.co')) {
 //                         const path = streamPageUrl.split('/');
 //                         const videoId = path[path.length - 2];
@@ -187,7 +187,7 @@ async function WatchSeries(req, sse) {
 //
 //                         const videoSourceUrl = sandbox.config.sources[0].file;
 //
-//                         sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
+//                         sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results');
                     } else if (streamPageUrl.includes('clipwatching.com')) {
 //                         const videoPageHtml = await rp({
 //                             uri: streamPageUrl,
@@ -206,7 +206,7 @@ async function WatchSeries(req, sse) {
 //                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
 //
 //                         setupObject.sources.forEach((source) => {
-//                             sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results')
+//                             sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results');
 //                         });
                     } else if (streamPageUrl.includes('estream.to') || streamPageUrl.includes('estream.xyz')) {
 //                         const path = streamPageUrl.split('/');
@@ -223,7 +223,7 @@ async function WatchSeries(req, sse) {
 //                         $ = cheerio.load(videoPageHtml);
 //
 //                         $('source').toArray().forEach((sourceElement) => {
-//                             sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results')
+//                             sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results');
 //                         });
                     } else if (streamPageUrl.includes('vidzi.online')) {
 //                         const videoPageHtml = await rp({
@@ -243,12 +243,56 @@ async function WatchSeries(req, sse) {
 //                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
 //
 //                         setupObject.sources.forEach((source) => {
-//                             sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results')
+//                             sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results');
 //                         });
                     } else if (streamPageUrl.includes('vidto.me')) {
-                        console.log('Skipping vidoto.me because the links are always broken.')
-                    } else if (streamPageUrl.includes('vidto.me')) {
-                        console.log('Skipping vidoto.me because the links are always broken.')
+                        // console.log('Skipping vidoto.me because the links are always broken.');
+                    } else if (streamPageUrl.includes('vidup.me') || streamPageUrl.includes('vidup.tv') || streamPageUrl.includes('thevideo.me')) {
+                        // console.log('Skipping vidup.me because they use captcha, which puppeteer can get around, but the links are usually low quality.');
+                    } else if (streamPageUrl.includes('vidtodo.me')) {
+                        // const videoSourceHtml = await rp({
+                        //     uri: streamPageUrl,
+                        //     headers: {
+                        //         'user-agent': userAgent
+                        //     },
+                        //     jar,
+                        //     timeout: 5000
+                        // });
+                        // const videoSourcesString = /(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1];
+                        // const sandbox = {};
+                        // vm.createContext(sandbox); // Contextify the sandbox.
+                        // const videoSources = vm.runInContext(videoSourcesString, sandbox);
+                        // videoSources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'https://vidtodo.me'}, 'results'));
+
+                        // console.log('IP locked and the header trick (x-real-ip, x-forwarded-for) is not working');
+                    } else if (streamPageUrl.includes('powvideo.net')) {
+//                         const path = streamPageUrl.split('/');
+//                         const videoId = path[path.length - 1];
+//                         const videoSourceHtml = await rp({
+//                             uri: `https://povwideo.cc/iframe-${videoId}-954x562.html`,
+//                             headers: {
+//                                 'user-agent': userAgent,
+//                                 referer: `https://povwideo.cc/preview-${videoId}-954x562.html`,
+//                                 'cache-control': 'no-cache',
+//                                 'pragma': 'no-cache',
+//                                 'upgrade-insecure-requests': '1',
+//                             },
+//                             jar,
+//                             timeout: 5000
+//                         });
+//
+//                         $ = cheerio.load(videoSourceHtml);
+//
+//                         let videoSources = [];
+//                         const jwplayer = () => ({setup(){ return this;}, on(){ return this; }});
+//                         const sandbox = {jwplayer, jQuery: {map(sources){ videoSources = sources; return {size(){}}; }}, sources: []};
+//                         vm.createContext(sandbox); // Contextify the sandbox.
+//                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0] && $('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+//                         videoSources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://powvideo.net'}, 'results'));
+
+                        // console.log('IP locked and the header trick (x-real-ip, x-forwarded-for) is not working');
+                    } else if (streamPageUrl.includes('streamplay.to')) {
+                        // console.log('Skipping streamplay.to because captcha.');
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
                     }
