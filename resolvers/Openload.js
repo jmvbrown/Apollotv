@@ -15,7 +15,6 @@ async function Openload(uri, jar, clientIp) {
 
     $ = cheerio.load(providerPageHtml);
 
-    const fileid = /(?:>window.fileid=")(.*)(?:";)/g.exec(providerPageHtml)[1];
     let wholeFileId = ''
     const jQuery = function(selector, anotherArg) {
         return {
