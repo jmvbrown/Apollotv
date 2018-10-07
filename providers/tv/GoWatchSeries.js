@@ -68,14 +68,42 @@ async function GoWatchSeries(req, sse) {
             
             $ = cheerio.load(episodePageHtml);
             const videoDiv = $('.play-video');
-            videoDiv.children().toArray().forEach((child) => {
-                if(child.name === 'iframe') {
-                    // console.log(child.attribs.src)
-                    console.log(child)
-                    
+            const otherVideoLinks = $('.anime_muti_link');
+            const iframeLinks = [];
+            
+            otherVideoLinks.children().toArray().forEach((c) => {
+                if (c.name === 'ul') {
+                    c.children.forEach((t) => {
+                        if (t.name === 'li') {
+                            iframeLinks.push(t.attribs['data-video'])
+                        }
+                    })
                 }
             })
-            // console.log($('.jw-video'))
+
+            let iframeSrc;
+            videoDiv.children().toArray().forEach((child) => {
+                if(child.name === 'iframe') {
+                    // console.log(child);
+                    iframeSrc = `https:${child.attribs.src}`
+                    iframeLinks.push(iframeSrc);
+                    // console.log(x);
+                }
+            })
+
+            const test = await rp({
+                uri: `${iframeSrc}`,
+                headers: {
+                    // 'user-agent': userAgent,
+                    // 'x-real-ip': req.client.remoteAddress,
+                    // 'x-forwarded-for': req.client.remoteAddress
+                },
+                jar,
+                timeout: 5000
+            })
+
+            console.log('links');
+            console.log(iframeLinks);
 
         } catch (e) {
             console.log(e)
