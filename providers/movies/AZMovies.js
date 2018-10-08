@@ -1,8 +1,5 @@
-const URL = require('url');
-const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
@@ -60,13 +57,13 @@ async function AZMovies(req, sse) {
 
             $('#serverul li a').toArray().forEach(async (element) => {
                 const providerUrl = $(element).attr('href');
-                if (providerUrl.startsWith('https://openload.co/embed')) {
+                if (providerUrl.includes('openload.co/embed')) {
                     const videoSourceUrl = await Openload(providerUrl, jar, req.client.remoteAddress);
                     sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
-                } else if (providerUrl.startsWith('https://streamango.com/embed')) {
+                } else if (providerUrl.includes('streamango.com/embed')) {
                     const videoSourceUrl = await Streamango(providerUrl, jar, req.client.remoteAddress);
                     sse.send({videoSourceUrl, url, provider: 'https://streamango.com', ipLocked: true}, 'results');
-                } else if (providerUrl.startsWith('https://files.azmovies.co')) {
+                } else if (providerUrl.includes('files.azmovies.co')) {
                     const videoPageHtml = await rp({
                         uri: providerUrl,
                         headers: {

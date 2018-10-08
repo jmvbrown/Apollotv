@@ -183,25 +183,43 @@
             <button type="button" onclick="stop()">Stop</button>
         </div>
         <div id="results"></div>
+        <script type="text/javascript" charset="utf-8" src="bcrypt.js"></script>
         <script type="text/javascript" charset="utf-8">
             const SECRET_CLIENT_ID = 'thisisjustaclienttest';
+            const bcrypt = dcodeIO.bcrypt;
             let es;
             async function authenticate() {
                 let token = localStorage.getItem('token');
                 if (token) {
-                    const response = await fetch(`/api/authenticated?token=${token}`, {
-                        method: 'GET',
-                        credentials: 'include'
-                    });
-                    const responseJSON = await response.json();
-                    if (responseJSON.auth) {
+                    const decodedToken = jwtDecode(token);
+                    const {exp} = decodedToken;
+                    if ((new Date()).valueOf() >= exp * 1000) {
+                        const response = await fetch(`/api/authenticated?token=${token}`, {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        const responseJSON = await response.json();
+                        if (responseJSON.auth) {
+                            return token;
+                        }
+                    } else {
                         return token;
                     }
                 }
 
+                const hashedSecret = await (new Promise((resolve, reject) => {
+                    bcrypt.hash(`${Math.floor((new Date()).valueOf() / 1000)}|${SECRET_CLIENT_ID}`, 10, function(err, hash) {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(hash);
+                        }
+                    });
+                }));
+
                 const response = await fetch('/api/login', {
                     method: 'POST',
-                    body: JSON.stringify({clientID: SECRET_CLIENT_ID}),
+                    body: JSON.stringify({clientID: hashedSecret}),
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -210,6 +228,7 @@
                 const responseJSON = await response.json();
                 token = responseJSON.token;
                 localStorage.setItem('token', token);
+
                 return token;
             }
             async function searchMovies() {
@@ -239,6 +258,45 @@
             }
             function stop() {
                 es.close();
+            }
+            function b64DecodeUnicode(str) {
+                return decodeURIComponent(atob(str).replace(/(.)/g, function (m, p) {
+                    var code = p.charCodeAt(0).toString(16).toUpperCase();
+                    if (code.length < 2) {
+                      code = '0' + code;
+                  }
+                  return '%' + code;
+              }));
+            }
+
+            function base64_url_decode(str) {
+                var output = str.replace(/-/g, "+").replace(/_/g, "/");
+                switch (output.length % 4) {
+                    case 0:
+                        break;
+                    case 2:
+                        output += "==";
+                        break;
+                    case 3:
+                        output += "=";
+                        break;
+                    default:
+                        throw "Illegal base64url string!";
+                }
+
+                try {
+                    return b64DecodeUnicode(output);
+                } catch (err) {
+                    return atob(output);
+                }
+            }
+
+            function jwtDecode(token) {
+                try {
+                    return JSON.parse(base64_url_decode(token.split('.')[1]));
+                } catch (e) {
+                    throw new Error('Invalid token specified: ' + e.message);
+                }
             }
         </script>
     </body>

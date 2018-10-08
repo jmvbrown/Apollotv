@@ -1,5 +1,3 @@
-const URL = require('url');
-const Promise = require('bluebird');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const tough = require('tough-cookie');

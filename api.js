@@ -1,15 +1,32 @@
 const SSE = require('express-sse');
 const providers = require('./providers');
-const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const authDelay = 5;
 
-function login(req, res) {
+async function login(req, res) {
     // check if the client ID is valid
-    const clientIsValid = req.body.clientID === process.env.SECRET_CLIENT_ID;
+    // const clientIsValid = req.body.clientID === process.env.SECRET_CLIENT_ID;
+    let clientIsValid = false;
+    for (let time = now = Math.floor((new Date()).valueOf() / 1000); time >= now - authDelay && !clientIsValid; time--) {
+      console.log(new Date(time * 1000));
+      clientIsValid = await (new Promise((resolve, reject) => {
+        bcrypt.compare(`${time}|${process.env.SECRET_CLIENT_ID}`, req.body.clientID, function(err, res) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(res);
+          }
+        });
+      }));
+    }
+    console.log(clientIsValid);
     if (!clientIsValid) return res.status(401).json({ auth: false, token: null });
 
     // create a token
     const token = jwt.sign({id: 'ApolloTV', message: 'This better be from our app...'}, process.env.SECRET_SERVER_ID, {
-      expiresIn: 86400 // expires in 24 hours
+      expiresIn: 3600 // expires in 1 hour
     });
 
     // return the information including token as JSON
