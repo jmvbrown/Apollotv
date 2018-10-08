@@ -100,6 +100,9 @@ async function WatchSeries(req, sse) {
                     const streamPageUrl = $('.action-btn').attr('href');
 
                     if (streamPageUrl.includes('openload.co')) {
+                        console.log()
+                        console.log()
+                        console.log(streamPageUrl)
                         const path = streamPageUrl.split('/');
                         const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
                         sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
