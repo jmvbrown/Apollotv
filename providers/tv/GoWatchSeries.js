@@ -99,37 +99,38 @@ async function GoWatchSeries(req, sse) {
             })
 
             iframeLinks.forEach(async(link) => {
-                // if (link.includes('openload.co')) {
-                //     const path = link.split('/');
-                //     console.log('path')
-                //     console.log(path)
-                //     const videoSourceUrl = await Openload(link, jar, req.client.remoteAddress);
-                //     sse.send({ videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true }, 'results');                    
-                // } else 
-                if (link.includes('vidcloud.icu')) {
+                if (link.includes('openload.co')) {
                     const path = link.split('/');
-                    const videoId = path[path.length - 2];
-                    console.log('ID ', videoId)
-                    const videoSourceObject = await rp({
-                        uri: `https://vidcloud.co/player?fid=${videoId}&page=video`,
-                        headers: {
-                            'user-agent': userAgent
-                        },
-                        jar,
-                        json: true,
-                        timeout: 5000
-                    });
+                    console.log('path')
+                    console.log(path)
+                    const videoSourceUrl = await Openload(link, jar, req.client.remoteAddress);
+                    sse.send({ videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true }, 'results');                    
+                } 
+                // else 
+                // if (link.includes('vidcloud.icu')) {
+                //     const path = link.split('/');
+                //     const videoId = path[path.length - 2];
+                //     console.log('ID ', videoId)
+                //     const videoSourceObject = await rp({
+                //         uri: `https://vidcloud.icu/player?fid=${videoId}&page=video`,
+                //         headers: {
+                //             'user-agent': userAgent
+                //         },
+                //         jar,
+                //         json: true,
+                //         timeout: 5000
+                //     });
 
-                    $ = cheerio.load(videoSourceObject.html);
+                //     $ = cheerio.load(videoSourceObject.html);
 
-                    const sandbox = { jwplayer() { return { setup() { }, on() { }, addButton() { } } }, $() { } };
-                    vm.createContext(sandbox); // Contextify the sandbox.
-                    vm.runInContext($('script').last()[0].children[0].data, sandbox);
+                //     const sandbox = { jwplayer() { return { setup() { }, on() { }, addButton() { } } }, $() { } };
+                //     vm.createContext(sandbox); // Contextify the sandbox.
+                //     vm.runInContext($('script').last()[0].children[0].data, sandbox);
 
-                    const videoSourceUrl = sandbox.config.sources[0].file;
+                //     const videoSourceUrl = sandbox.config.sources[0].file;
 
-                    sse.send({ videoSourceUrl, url, provider: 'https://vidcloud.co' }, 'results');
-                }
+                //     sse.send({ videoSourceUrl, url, provider: 'https://vidcloud.co' }, 'results');
+                // }
             })
 
             // const test = await rp({
