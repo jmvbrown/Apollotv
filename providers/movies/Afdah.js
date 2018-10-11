@@ -3,6 +3,8 @@ const cheerio = require('cheerio');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
+const Openload = require('../../resolvers/Openload');
+
 async function Afdah(req, sse) {
     const movieTitle = req.query.title;
 
@@ -120,14 +122,43 @@ async function Afdah(req, sse) {
                     .replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`);
 
 
-                const vm = require('vm');
-                const sandbox = {window: {checkSrc: function(){}}}; // starting variables
-                vm.createContext(sandbox); // Contextify the sandbox.
-                vm.runInContext(cleanedObfuscatedSources, sandbox);
-                videoSourceUrl = sandbox.window.srcs[0].url;
-                videoSourceSize = sandbox.window.srcs[0].size;
+                try {
+                    const vm = require('vm');
+                    const sandbox = {window: {checkSrc: function(){}}}; // starting variables
+                    vm.createContext(sandbox); // Contextify the sandbox.
+                    vm.runInContext(cleanedObfuscatedSources, sandbox);
+                    videoSourceUrl = sandbox.window.srcs[0].url;
+                    videoSourceSize = sandbox.window.srcs[0].size;
 
-                sse.send({videoSourceUrl, provider: url}, 'results');
+                    sse.send({videoSourceUrl, provider: url}, 'results');
+                } catch(err) {
+                    const openloadData = await rp({
+                        uri: ' https://vidlink.org/opl/info',
+                        method: 'POST',
+                        headers: {
+                            accept: 'text/html, */*; q=0.01',
+                            'accept-language': 'en-US,en;q=0.9',
+                            // 'accept-encoding': 'gzip, deflate, br',
+                            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            dnt: 1,
+                            origin: 'https://vidlink.org',
+                            referer: videoStreamUrl,
+                            'save-data': 'on',
+                            'user-agent': userAgent,
+                            'x-requested-with': 'XMLHttpRequest'
+                        },
+                        formData: {
+                            postID,
+                        },
+                        jar,
+                        json: true,
+                        timeout: 5000
+                    });
+
+                    const openloadUrl = `https://oload.cloud/embed/${openloadData.id}`;
+                    const videoSourceUrl = await Openload(openloadUrl, jar, req.client.remoteAddress);
+                    sse.send({videoSourceUrl, url, provider: 'https://oload.cloud', ipLocked: true}, 'results');
+                }
             }
 
 

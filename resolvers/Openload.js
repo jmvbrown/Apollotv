@@ -30,11 +30,13 @@ async function Openload(uri, jar, clientIp) {
                 }
                 wholeFileId = t;
             },
-            click() {}
+            click() {},
+            hide() {},
         }
     };
 
     // starting variables
+    let test = {}
     const sandbox = {
         $: jQuery,
         jQuery,
