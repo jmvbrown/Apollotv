@@ -4,15 +4,17 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const randomUseragent = require('random-useragent');
+const tough = require('tough-cookie');
+const vm = require('vm');
 
 const logger = require('../../utils/logger')
 
 const Openload = require('../../resolvers/Openload');
 
 async function GoWatchSeries(req, sse) {
-    const showTitle = req.query.title;
+    const showTitle = req.query.title.toLowerCase();
     const { season, episode } = req.query;
-    console.log(season)
+    console.log(req.query)
 
     const urls = ['https://gowatchseries.co'];
     const promises = [];
@@ -39,10 +41,9 @@ async function GoWatchSeries(req, sse) {
             const seasonLinks = []
             const seasonLink = $('.hover_watch').toArray().find((moviePoster) => {
                 const link = $(moviePoster.parent).attr('href');
-                return link.includes(`${showTitle}-season-${season}`)
+                return link.includes(`${showTitle}-season-${season}`) || link.includes(`${showTitle.replace(' ', '-')}-season-${season}`)
             });
             const seasonPageLink = `${url}${$(seasonLink.parent).attr('href')}`
-            console.log(seasonPageLink)
            
             const seasonPageHtml = await rp({
                 uri: `${seasonPageLink}`,
@@ -91,28 +92,27 @@ async function GoWatchSeries(req, sse) {
             let iframeSrc;
             videoDiv.children().toArray().forEach((child) => {
                 if(child.name === 'iframe') {
-                    // console.log(child);
                     iframeSrc = `https:${child.attribs.src}`
                     iframeLinks.push(iframeSrc);
-                    // console.log(x);
                 }
             })
 
             iframeLinks.forEach(async(link) => {
                 if (link.includes('openload.co')) {
-                    const path = link.split('/');
+                    const path = link.split('?');
                     console.log('path')
                     console.log(path)
-                    const videoSourceUrl = await Openload(link, jar, req.client.remoteAddress);
+                    const videoSourceUrl = await Openload(path[0], jar, req.client.remoteAddress);
+                    console.log(videoSourceUrl)
                     sse.send({ videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true }, 'results');                    
                 } 
-                // else 
-                // if (link.includes('vidcloud.icu')) {
-                //     const path = link.split('/');
+                // else if (link.includes('vidcloud.icu')) {
+                //     const path = link.split('?')[1].split('=')[1];
+                //     console.log(path)
                 //     const videoId = path[path.length - 2];
                 //     console.log('ID ', videoId)
                 //     const videoSourceObject = await rp({
-                //         uri: `https://vidcloud.icu/player?fid=${videoId}&page=video`,
+                //         uri: `https://vidcloud.icu/player?fid=${path}&page=video`,
                 //         headers: {
                 //             'user-agent': userAgent
                 //         },
@@ -131,18 +131,51 @@ async function GoWatchSeries(req, sse) {
 
                 //     sse.send({ videoSourceUrl, url, provider: 'https://vidcloud.co' }, 'results');
                 // }
-            })
-
-            // const test = await rp({
-            //     uri: `${iframeSrc}`,
-            //     headers: {
-            //         // 'user-agent': userAgent,
-            //         // 'x-real-ip': req.client.remoteAddress,
-            //         // 'x-forwarded-for': req.client.remoteAddress
-            //     },
-            //     jar,
-            //     timeout: 5000
-            // })
+                else if (link.includes('rapidvideo')) {
+                    const videoPageHtml = await rp({
+                        uri: link,
+                        headers: {
+                            'user-agent': userAgent,
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
+                        },
+                        jar,
+                        timeout: 5000
+                    });
+                    $ = cheerio.load(videoPageHtml);
+                    $('source').toArray().forEach((sourceElement) => {
+                        sse.send({ videoSourceUrl: $(sourceElement).attr('src'), quality: $(sourceElement).attr('title'), url, provider: 'https://rapidvideo.com' }, 'results');
+                    })
+                }
+                else if (link.includes('streamango')) {
+                    const videoPageHtml = await rp({
+                        uri: link,
+                        headers: {
+                            'user-agent': userAgent,
+                            'x-real-ip': req.client.remoteAddress,
+                            'x-forwarded-for': req.client.remoteAddress
+                        },
+                        jar,
+                        timeout: 5000
+                    });
+                    $ = cheerio.load(videoPageHtml);
+                    let setupObject = {};
+                    const sandbox = { window: {}, setInterval() {}, jwplayer() { return { setup(value) { setupObject = value; }, on() { } } } };
+                    vm.createContext(sandbox); // Contextify the sandbox.
+                    vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+                    console.log('----')
+                    console.log(setupObject)
+                    setupObject.sources.forEach((source) => {
+                        console.log(source)
+                        sse.send({ videoSourceUrl: source.file, url, provider: 'https://vidzi.online' }, 'results');
+                    });
+                    // console.log(videoPageHtml)
+                    // $('video').toArray().forEach((sourceElement) => {
+                    //     console.log($(sourceElement).attr('src'))
+                    //     sse.send({ videoSourceUrl: $(sourceElement).attr('src'), quality: $(sourceElement).attr('title'), url, provider: 'https://streamango.com' }, 'results');
+                    // })
+                }
+            })  
 
             console.log('links');
             console.log(iframeLinks);

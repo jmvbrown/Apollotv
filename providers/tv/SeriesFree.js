@@ -6,7 +6,7 @@ const vm = require('vm');
 
 const Openload = require('../../resolvers/Openload');
 
-async function WatchSeries(req, sse) {
+async function SeriesFree(req, sse) {
     const showTitle = req.query.title;
     const {season, episode} = req.query;
 
@@ -98,11 +98,7 @@ async function WatchSeries(req, sse) {
                     $ = cheerio.load(videoPageHtml);
 
                     const streamPageUrl = $('.action-btn').attr('href');
-
                     if (streamPageUrl.includes('openload.co')) {
-                        console.log()
-                        console.log()
-                        console.log(streamPageUrl)
                         const path = streamPageUrl.split('/');
                         const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
                         sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
@@ -296,6 +292,30 @@ async function WatchSeries(req, sse) {
                         console.log('Skipping powvideo.net because IP locked and the header trick (x-real-ip, x-forwarded-for) is not working');
                     } else if (streamPageUrl.includes('streamplay.to')) {
                         console.log('Skipping streamplay.to because captcha.');
+                    } else if (streamPageUrl.includes('gamovideo.com')) {
+                        const videoPageHtml = await rp({
+                            uri: streamPageUrl,
+                            headers: {
+                                'user-agent': userAgent,
+                                'Upgrade-Insecure-Requests': 1
+                            },
+                            followAllRedirects: true,
+                            jar,
+                            timeout: 5000
+                        });
+
+                        $ = cheerio.load(videoPageHtml);
+
+                        let setupObject = {};
+                        const sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }, onTime(){}, onPlay(){}, onComplete(){}, onSeek(){}} }};
+                        vm.createContext(sandbox); // Contextify the sandbox.
+                        vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
+
+                        setupObject.playlist.forEach(listItem => {
+                            listItem.sources.forEach(source => {
+                                sse.send({videoSourceUrl: source.file, url, provider: 'http://gamovideo.com'}, 'results');
+                            })
+                        });
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
                     }
@@ -315,10 +335,7 @@ async function WatchSeries(req, sse) {
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
-    })
-
-    // Wait for all the scrapers to return before closing the browser
-    await Promise.all(promises);
+    });
 }
 
-module.exports = exports = WatchSeries;
+module.exports = exports = SeriesFree;
