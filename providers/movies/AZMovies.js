@@ -5,6 +5,7 @@ const randomUseragent = require('random-useragent');
 
 const Openload = require('../../resolvers/Openload');
 const Streamango = require('../../resolvers/Streamango');
+const RapidVideo = require('../../resolvers/RapidVideo');
 
 async function AZMovies(req, sse) {
     const movieTitle = req.query.title;
@@ -94,6 +95,11 @@ async function AZMovies(req, sse) {
                     const m3u8File = Buffer.from(videoStreamFile.replace(/az\d\d\d\.ts/g, `${streamUrl}$&`)).toString('base64');
 
                     sse.send({m3u8File, url, provider: 'https://files.azmovies.co'}, 'results');
+                } else if (providerUrl.includes('rapidvideo.com')) {
+                    const videoSourceUrl = await RapidVideo(providerUrl, jar);
+                    sse.send({videoSourceUrl, url, provider: 'https://rapidvideo.com'}, 'results');
+                } else {
+                    console.log('Still need a resolver for', providerUrl);
                 }
             });
         } catch (err) {
