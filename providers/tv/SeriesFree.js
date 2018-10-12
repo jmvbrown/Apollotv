@@ -185,6 +185,7 @@ async function SeriesFree(req, sse) {
                         vm.createContext(sandbox); // Contextify the sandbox.
                         vm.runInContext($('script').last()[0].children[0].data, sandbox);
 
+                        // FIXME: this should loop over the sources and return all of them
                         const videoSourceUrl = sandbox.config.sources[0].file;
 
                         sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results');

@@ -46,3 +46,11 @@ app.get('/api/search/tv', api.verifyToken, api.searchTv);
 app.listen(3000, () => {
     console.log('express server listening on: 3000');
 });
+
+// Test a resolver with the below code
+
+// const Openload = require('./resolvers/Openload');
+// (async function() {
+// 	const videoSourceUrl = await Openload('https://openload.co/embed/WimYxMz-Wlk', require('request-promise').jar(), '77.111.246.9');
+// 	console.log(videoSourceUrl);
+// })()
