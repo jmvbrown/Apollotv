@@ -1,7 +1,8 @@
 const SSE = require('express-sse');
 const providers = require('./providers');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
+const bcrypt = require('./public/bcrypt');
 const saltRounds = 10;
 const authDelay = 5;
 
