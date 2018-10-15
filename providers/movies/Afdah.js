@@ -1,6 +1,5 @@
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
 const Openload = require('../../resolvers/Openload');

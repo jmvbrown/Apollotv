@@ -11,6 +11,7 @@ async function VidTodo(uri, jar, clientIp, userAgent) {
         jar,
         timeout: 5000
     });
+    console.log(uri)
     const videoSourcesString = /(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1];
     const sandbox = {};
     vm.createContext(sandbox); // Contextify the sandbox.

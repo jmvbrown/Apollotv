@@ -10,7 +10,7 @@ async function SpeedVid(uri, jar, clientIp, userAgent) {
             'Cache-Control': 'no-cache',
             'Host': 'www.speedvid.net',
             'Pragma': 'no-cache',
-            'Upgrade-Insecure-Requests': '1',
+            'Upgrade-Insecure-Requests': '1'
         },
         jar,
         timeout: 5000
@@ -20,14 +20,17 @@ async function SpeedVid(uri, jar, clientIp, userAgent) {
 
     // starting variables
     let videoSourcePageUrl = '';
-    const sandbox = {location: {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}}};
+    const location = {assign(redirectUrl){ videoSourcePageUrl = `http://www.speedvid.net${redirectUrl}`}, href: ''};
+    let sandbox = {location, window: {location}};
     vm.createContext(sandbox); // Contextify the sandbox.
     vm.runInContext($('script').last()[0].children[0].data, sandbox);
 
     const videoSourceHtml = await rp({
-        uri: videoSourcePageUrl,
+        uri: videoSourcePageUrl || `http://www.speedvid.net${location.href}`,
         headers: {
-            'user-agent': userAgent
+            'user-agent': userAgent,
+            'Referer': uri,
+            'Cookie': (Math.floor((900 - 100) * Math.random()) + 100) * ((new Date()).valueOf() / 1000) * (128 / 8)
         },
         jar,
         timeout: 5000
@@ -35,7 +38,11 @@ async function SpeedVid(uri, jar, clientIp, userAgent) {
 
     $ = cheerio.load(videoSourceHtml);
 
-    return $('source').attr('src');
+    let setupObject = {};
+    sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }} }, primary: true};
+    vm.createContext(sandbox); // Contextify the sandbox.
+    vm.runInContext($(`script:contains("jwplayer('vplayer').setup")`)[0].children[0].data, sandbox);
+    return setupObject.file;
 }
 
 module.exports = exports = SpeedVid;

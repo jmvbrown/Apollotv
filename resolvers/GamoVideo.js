@@ -4,7 +4,7 @@ const vm = require('vm');
 
 async function GamoVideo(uri, jar, clientIp, userAgent, videoId) {
     const videoPageHtml = await rp({
-        uri: streamPageUrl,
+        uri,
         headers: {
             'user-agent': userAgent,
             'Upgrade-Insecure-Requests': 1

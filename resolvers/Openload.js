@@ -7,10 +7,9 @@ async function Openload(uri, jar, clientIp, userAgent) {
         uri,
         headers: {
             'user-agent': userAgent,
-            'x-real-ip': clientIp,
-            'x-forwarded-for': clientIp
         },
         jar,
+        followAllRedirects: true,
         timeout: 5000
     });
 
