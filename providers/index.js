@@ -5,6 +5,7 @@ const providers =
 			require('./movies/AZMovies'),
 		],
 		tv: [
+			require('./tv/GoWatchSeries'),
 			require('./tv/SeriesFree'),
 			require('./tv/AfdahTV'),
 		],

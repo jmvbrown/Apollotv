@@ -98,7 +98,6 @@ async function SeriesFree(req, sse) {
                     $ = cheerio.load(videoPageHtml);
 
                     const streamPageUrl = $('.action-btn').attr('href');
-
                     if (streamPageUrl.includes('openload.co')) {
                         const path = streamPageUrl.split('/');
                         const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
