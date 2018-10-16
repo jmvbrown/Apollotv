@@ -3,6 +3,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 const vm = require('vm');
+const URL = require('url');
 
 const Openload = require('../../resolvers/Openload');
 const Vidlox = require('../../resolvers/Vidlox');
@@ -24,7 +25,7 @@ async function SeriesFree(req, sse) {
     // These providers were in the Terarium source, but are now dead..... We need to find others
     // https://seriesfree1.bypassed.bz, https://seriesfree1.bypassed.eu, https://seriesfree1.bypassed.bz
 
-    const urls = ["https://seriesfree.to"];
+    const urls = ["https://www1.swatchseries.to"];
     const promises = [];
     let browser;
 
@@ -36,7 +37,8 @@ async function SeriesFree(req, sse) {
             const html = await rp({
                 uri: `${url}/search/${showTitle.replace(/ \(.*\)/, '').replace(/ /, '%20')}`,
                 headers: {
-                    'user-agent': userAgent
+                    'user-agent': userAgent,
+                    referer: url
                 },
                 jar,
                 timeout: 5000
@@ -46,9 +48,9 @@ async function SeriesFree(req, sse) {
 
             let showUrl = '';
 
-            $('.serie-title').toArray().some(element => {
+            $(`a strong`).toArray().some(element => {
                 if ($(element).text() === showTitle) {
-                    showUrl = `${url}${$(element).parent().attr('href')}`;
+                    showUrl = $(element).parent().attr('href');
                     return true;
                 }
                 return false;
@@ -65,14 +67,7 @@ async function SeriesFree(req, sse) {
 
             $ = cheerio.load(videoPageHtml);
 
-            let episodeUrl = '';
-            $('.sinfo').toArray().some(element => {
-                if ($(element).text() === `${season}×${episode}`) {
-                    episodeUrl = `${url}${$(element).parent().attr('href')}`;
-                    return true;
-                }
-                return false;
-            });
+            const episodeUrl = $(`a[href*="s${season}_e${episode}"]`).attr('href');
 
             const episodePageHtml = await rp({
                 uri: episodeUrl,
@@ -85,22 +80,9 @@ async function SeriesFree(req, sse) {
 
             $ = cheerio.load(episodePageHtml);
 
-            const videoUrls = $('.watch-btn').toArray().map(element => `${url}${$(element).attr('href')}`);
+            const videoUrls = $('.watchlink').toArray().map(element => URL.parse($(element).attr('href') || '', true).query.r).filter(url => !!url).map(url => Buffer.from(url, 'base64').toString());
 
-            videoUrls.forEach(async (videoUrl) => {
-                const videoPageHtml = await rp({
-                    uri: videoUrl,
-                    headers: {
-                        'user-agent': userAgent
-                    },
-                    jar,
-                    timeout: 5000
-                });
-
-                $ = cheerio.load(videoPageHtml);
-
-                const streamPageUrl = $('.action-btn').attr('href');
-
+            videoUrls.forEach(async (streamPageUrl) => {
                 try {
                     if (streamPageUrl.includes('openload.co')) {
                         const path = streamPageUrl.split('/');

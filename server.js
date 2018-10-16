@@ -5,12 +5,12 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const api = require('./api');
 const verifyToken = require('./api');
-const morgan = require('morgan')
-const logger = require('./utils/logger')
+const morgan = require('morgan');
+const logger = require('./utils/logger');
 
 require('dotenv').config();
 
-let app = express();
+const app = express();
 
 const pathToApp = __dirname;
 app.use(express.static(`${pathToApp}/public`));
