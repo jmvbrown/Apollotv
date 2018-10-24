@@ -140,7 +140,7 @@ async function GoWatchSeries(req, sse) {
                     });
                     $ = cheerio.load(videoPageHtml);
                     $('source').toArray().forEach((sourceElement) => {
-                        sse.send({ videoSourceUrl: $(sourceElement).attr('src'), quality: $(sourceElement).attr('title'), url, provider: 'https://rapidvideo.com' }, 'results');
+                        sse.send({ videoSourceUrl: $(sourceElement).attr('src'), quality: $(sourceElement).attr('title'), url, provider: 'https://rapidvideo.com' }, 'result');
                     })
                 }
                 else if (link.includes('streamango')) {
@@ -160,7 +160,7 @@ async function GoWatchSeries(req, sse) {
                     // vm.createContext(sandbox); // Contextify the sandbox.
                     // vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
                     // setupObject.sources.forEach((source) => {
-                    //     sse.send({ videoSourceUrl: source.file, url, provider: 'https://streamango.com' }, 'results');
+                    //     sse.send({ videoSourceUrl: source.file, url, provider: 'https://streamango.com' }, 'result');
                     // });
                     console.log('TODO: Fix Streamandgo for GoWatchSeries');
                 }
