@@ -101,7 +101,7 @@ async function SeriesFree(req, sse) {
                     if (streamPageUrl.includes('openload.co')) {
                         const path = streamPageUrl.split('/');
                         const videoSourceUrl = await Openload(`https://openload.co/embed/${path[path.length - 1]}`, jar, req.client.remoteAddress);
-                        sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
+                        sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'result');
                     } else if (streamPageUrl.includes('vidlox.me')) {
                         const videoSourceHtml = await rp({
                             uri: streamPageUrl,
@@ -114,7 +114,7 @@ async function SeriesFree(req, sse) {
                             timeout: 5000
                         });
                         const videoSourceUrls = JSON.parse(/(?:sources:\s)(\[.*\])/g.exec(videoSourceHtml)[1]);
-                        videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'results'));
+                        videoSourceUrls.forEach(videoSourceUrl => sse.send({videoSourceUrl, url, provider: 'https://vidlox.me'}, 'result'));
                     } else if (streamPageUrl.includes('vshare.eu')) {
                         const path = streamPageUrl.split('/');
                         const videoId = path[path.length - 1].replace('.htm', '');
@@ -129,7 +129,7 @@ async function SeriesFree(req, sse) {
 
                         $ = cheerio.load(videoSourceHtml);
 
-                        sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'results');
+                        sse.send({videoSourceUrl: $('source').attr('src'), url, provider: 'https://vidlox.me'}, 'result');
                     } else if (streamPageUrl.includes('speedvid.net')) {
                         const path = streamPageUrl.split('/');
                         const videoId = path[path.length - 1];
@@ -164,7 +164,7 @@ async function SeriesFree(req, sse) {
 
                         const videoSourceUrl = $('source').attr('src');
 
-                        sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results');
+                        sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'result');
                     } else if (streamPageUrl.includes('vidcloud.co')) {
                         const path = streamPageUrl.split('/');
                         const videoId = path[path.length - 2];
@@ -186,7 +186,7 @@ async function SeriesFree(req, sse) {
 
                         const videoSourceUrl = sandbox.config.sources[0].file;
 
-                        sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results');
+                        sse.send({videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'result');
                     } else if (streamPageUrl.includes('clipwatching.com')) {
                         const videoPageHtml = await rp({
                             uri: streamPageUrl,
@@ -205,7 +205,7 @@ async function SeriesFree(req, sse) {
                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
 
                         setupObject.sources.forEach((source) => {
-                            sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results');
+                            sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'result');
                         });
                     } else if (streamPageUrl.includes('estream.to') || streamPageUrl.includes('estream.xyz')) {
                         const path = streamPageUrl.split('/');
@@ -222,7 +222,7 @@ async function SeriesFree(req, sse) {
                         $ = cheerio.load(videoPageHtml);
 
                         $('source').toArray().forEach((sourceElement) => {
-                            sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'results');
+                            sse.send({videoSourceUrl: $(sourceElement).attr('src'), url, provider: 'https://estream.to'}, 'result');
                         });
                     } else if (streamPageUrl.includes('vidzi.online')) {
                         const videoPageHtml = await rp({
@@ -242,7 +242,7 @@ async function SeriesFree(req, sse) {
                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
 
                         setupObject.sources.forEach((source) => {
-                            sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results');
+                            sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'result');
                         });
                     } else if (streamPageUrl.includes('vidto.me')) {
                         console.log('Skipping vidoto.me because the links are always broken.');
@@ -261,7 +261,7 @@ async function SeriesFree(req, sse) {
                         // const sandbox = {};
                         // vm.createContext(sandbox); // Contextify the sandbox.
                         // const videoSources = vm.runInContext(videoSourcesString, sandbox);
-                        // videoSources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'https://vidtodo.me'}, 'results'));
+                        // videoSources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'https://vidtodo.me'}, 'result'));
 
                         console.log('Skipping vidtodo.me because IP locked and the header trick (x-real-ip, x-forwarded-for) is not working');
                     } else if (streamPageUrl.includes('powvideo.net')) {
@@ -287,7 +287,7 @@ async function SeriesFree(req, sse) {
 //                         const sandbox = {jwplayer, jQuery: {map(sources){ videoSources = sources; return {size(){}}; }}, sources: []};
 //                         vm.createContext(sandbox); // Contextify the sandbox.
 //                         vm.runInContext($('script:contains("p,a,c,k,e,d")')[0] && $('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
-//                         videoSources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://powvideo.net'}, 'results'));
+//                         videoSources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://powvideo.net'}, 'result'));
 
                         console.log('Skipping powvideo.net because IP locked and the header trick (x-real-ip, x-forwarded-for) is not working');
                     } else if (streamPageUrl.includes('streamplay.to')) {
@@ -313,7 +313,7 @@ async function SeriesFree(req, sse) {
 
                         setupObject.playlist.forEach(listItem => {
                             listItem.sources.forEach(source => {
-                                sse.send({videoSourceUrl: source.file, url, provider: 'http://gamovideo.com'}, 'results');
+                                sse.send({videoSourceUrl: source.file, url, provider: 'http://gamovideo.com'}, 'result');
                             })
                         });
                     } else {

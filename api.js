@@ -66,14 +66,18 @@ function authenticated(req, res, next) {
 function searchMovies(req, res) {
     const sse = new SSE();
     sse.init(req, res);
-
+    // initial `status` message for debug on client
+    sse.send({ data: [`${new Date().getTime()}`], event: 'status'}, 'result');
+    
     [...providers.movies, ...providers.universal].forEach(provider => provider(req, sse));
 }
 
 function searchTv(req, res) {
     const sse = new SSE();
     sse.init(req, res);
-
+    // initial `status` message for debug on client
+    sse.send({ data: [`${new Date().getTime()}`], event: 'status'}, 'result');
+    
     [...providers.tv, ...providers.universal].forEach(provider => provider(req, sse));
 }
 
