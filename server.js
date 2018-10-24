@@ -36,7 +36,12 @@ app.use(function (req, res, next) {
 app.use(morgan('combined', { stream: logger.stream }))
 
 app.get('/', function(req, res) {
-    res.sendFile(`${pathToApp}/public/index.html`);
+    if(process.env.NODE_ENV === 'production'){
+        // When in production, redirect to the main site.
+        res.redirect("https://apollotv.xyz/");
+    }else {
+        res.sendFile(`${pathToApp}/public/index.html`);
+    }
 });
 
 app.post('/api/login', api.login);
