@@ -45,9 +45,9 @@ hour is up, the client will request another token.
 - Open the developer console and watch the links arrive.
 
 Calling the Movie API:
-- URL: `127.0.0.1:3000/api/search`
+- URL: `127.0.0.1:3000/api/v1/search`
 - Querystrings required: <br>
-    `queryString`: movie title (exact name) <br>
+    `title`: movie title (exact name) <br>
     `token`: valid JWT token
 
 
@@ -56,7 +56,7 @@ Calling the Movie API:
 - Open the developer console and watch the links arrive.
 
 Calling the TV API:
-- URL: `127.0.0.1:3000/api/search/tv`
+- URL: `127.0.0.1:3000/api/v1/search/tv`
 - Querystrings required:  
     `show`: name of show  
     `season`: season  
