@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const AES = require('crypto-js/aes');
 
 const Openload = require('../../resolvers/Openload');
-const utils = require("../../utils/index");
+const utils = require("../../../utils/index");
 
 async function AfdahTV(req, sse) {
     const title = req.query.title;

@@ -2,7 +2,7 @@
 
 // Import dependencies
 const express = require('express');
-const logger = require('./utils/logger');
+const logger = require('./src/utils/logger');
 
 // Load and define application data
 const pkg = require('./package.json');
@@ -54,10 +54,10 @@ app.get('/bcrypt.js', (req, res) => res.sendFile(`${pathToApp}/public/bcrypt.js`
 
 
 /** API ROUTES **/
-const authRoutes = require('./api/authRoutes');
+const authRoutes = require('./src/api/authRoutes');
 app.use('/api/v1', authRoutes);
 
-const searchRoutes = require('./api/searchRoutes');
+const searchRoutes = require('./src/api/searchRoutes');
 app.use('/api/v1/search', searchRoutes);
 /** ./API ROUTES **/
 
