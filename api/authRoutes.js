@@ -57,7 +57,9 @@ authRoutes.post('/login', async (req, res) => {
  * If the client's token is valid, 'auth' will return true.
  * 'message' is just a human-readable message explaining the status.
  */
-authRoutes.get('/authenticated', (req, res) => {
+authRoutes.all('/authenticated', (req, res) => {
+    if (req.method !== "GET" && req.method !== "POST") return res.json({ auth: false, message: "Invalid HTTP method." });
+
     // check header or url parameters or post parameters for token
     const token = req.headers['x-access-token'] || req.body.token || req.query.token;
     if (!token) return res.json({auth: false, message: 'You did not provide a token.'});

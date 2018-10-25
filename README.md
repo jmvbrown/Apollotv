@@ -26,6 +26,31 @@ If the hash is valid within the time frame of 5 seconds, it is authorized and
 the server sends a token down to the client that will last 1 hour. After the 
 hour is up, the client will request another token.
 
+**Calling the authentication API:**  
+
+*Logging in*
+
+- URL: `/api/v1/login`
+- Method: `POST`
+- Body:
+```json
+{
+  "clientId": "{...}"
+}
+```
+
+*Checking authentication status*
+- URL: `/api/v1/authenticated`
+- Method: `GET` or `POST`
+- Parameters:
+    - `token`: JWT token to validate.
+- Body (`POST`):
+```json
+{
+  "token": "{...}"
+}
+```
+
 ### Testing the server
 
 ### Running in Development Mode
@@ -44,21 +69,23 @@ hour is up, the client will request another token.
 - Search for the exact name of a movie, like `The Avengers`.
 - Open the developer console and watch the links arrive.
 
-Calling the Movie API:
-- URL: `127.0.0.1:3000/api/v1/search`
-- Querystrings required: <br>
-    `title`: movie title (exact name) <br>
-    `token`: valid JWT token
+**Calling the Movie API:**
+- Endpoint: `/api/v1/search/movies`
+- Method: `GET`
+- Parameters
+    - `title`: movie title (exact name) <br>
+    - `token`: valid JWT token
 
 
 #### TV
 - Search for a TV show by filling in name, season, episode. Eg: `Suits 4 1` (in the respective text boxes)
 - Open the developer console and watch the links arrive.
 
-Calling the TV API:
-- URL: `127.0.0.1:3000/api/v1/search/tv`
-- Querystrings required:  
-    `show`: name of show  
-    `season`: season  
-    `episode`: episode  
-    `token`: valid JWT token
+**Calling the TV API:**
+- Endpoint: `/api/v1/search/tv`
+- Method: `GET`
+- Parameters
+    - `show`: name of show  
+    - `season`: season  
+    - `episode`: episode  
+    - `token`: valid JWT token
