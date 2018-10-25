@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
-    "dev": "NODE_ENV=development node server.js"
+    "start": "cross-env NODE_ENV=production node server.js",
+    "dev": "cross-env NODE_ENV=development node server.js"
   },
   "dependencies": {
     "app-root-path": "^2.1.0",
@@ -28,7 +28,9 @@
     "request-promise": "^4.2.2",
     "winston": "^3.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "cross-env": "^5.2.0"
+  },
   "eslintConfig": {
     "root": true,
     "env": {

@@ -3,12 +3,12 @@ const cheerio = require('cheerio');
 const AES = require('crypto-js/aes');
 
 const Openload = require('../../resolvers/Openload');
-const padTvNumbers = require("../../utils/padTvNumbers");
+const utils = require("../../utils/index");
 
 async function AfdahTV(req, sse) {
     const title = req.query.title;
-    const season = padTvNumbers(req.query.season);
-    const episode = padTvNumbers(req.query.episode);
+    const season = utils.padTvNumber(req.query.season);
+    const episode = utils.padTvNumber(req.query.episode);
 
     const url = 'https://afdah.to';
     const promises = [];
@@ -174,9 +174,7 @@ function tor(txt) {
         }
 
         return buf;
-    } catch(err) {
-        return;
-    }
+    } catch(ignored) {}
 }
 
 module.exports = exports = AfdahTV;
