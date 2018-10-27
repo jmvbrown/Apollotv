@@ -7,8 +7,8 @@ const providers =
 			require('./movies/AZMovies'),
 		],
 		tv: [
-			// require('./tv/SeriesFree'),
-			// require('./tv/AfdahTV'),
+			require('./tv/SeriesFree'),
+			require('./tv/AfdahTV'),
 			require('./tv/SwatchSeries'),
 		],
 		universal: [
