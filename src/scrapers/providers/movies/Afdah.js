@@ -129,7 +129,7 @@ async function Afdah(req, sse) {
                     videoSourceUrl = sandbox.window.srcs[0].url;
                     videoSourceSize = sandbox.window.srcs[0].size;
 
-                    sse.send({videoSourceUrl, provider: url}, 'results');
+                    sse.send({videoSourceUrl, provider: url}, 'result');
                 } catch(err) {
                     const openloadData = await rp({
                         uri: ' https://vidlink.org/opl/info',
@@ -156,7 +156,7 @@ async function Afdah(req, sse) {
 
                     const openloadUrl = `https://oload.cloud/embed/${openloadData.id}`;
                     const videoSourceUrl = await Openload(openloadUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://oload.cloud', ipLocked: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://oload.cloud', ipLocked: true}, 'result');
                 }
             }
 

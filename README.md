@@ -1,21 +1,19 @@
 # Claws
-
-The claws backend scraper for NXTV.
+The server-side scraper software for ApolloTV.
 
 ## Getting Started
 
 ### Installation
-
-Install node (v10.10.0) and npm (v6.4.1).
-- Clone the repo.
-- Navigate to the directory.
+Install node^10.10.0 and npm^6.4.1.
+- Clone the repository and navigate to the directory.
 - Run `npm install`.
-- Copy the contents of `.env.dist` to a file called `.env`
-- Fill in the values for `SECRET_SERVER_ID` and `SECRET_CLIENT_ID`
+- Copy the contents of `.env.dist` to a file called `.env`.
+- Fill in the values for `SECRET_SERVER_ID` and `SECRET_CLIENT_ID`.
+    - You can use `./generate-env-values.sh` to help.
 
 ### Security
-In order to become authorized with the server, the client must make a login
-request with the hashed (using the bcrypt library) SECRET_CLIENT_KEY and the
+In order to authenticate with the server, the client must make a login
+request with the hashed (using the `bcrypt` library) `SECRET_CLIENT_ID` and the
 current time. It will look like this before it's hashed:
 
 `${current time in seconds}|${SECRET_CLIENT_ID}`
@@ -28,40 +26,66 @@ If the hash is valid within the time frame of 5 seconds, it is authorized and
 the server sends a token down to the client that will last 1 hour. After the
 hour is up, the client will request another token.
 
+**Calling the authentication API:**
+
+*Logging in*
+
+- URL: `/api/v1/login`
+- Method: `POST`
+- Body:
+```json
+{
+  "clientId": "{...}"
+}
+```
+
+*Checking authentication status*
+- URL: `/api/v1/authenticated`
+- Method: `GET` or `POST`
+- Parameters:
+    - `token`: JWT token to validate.
+- Body (`POST`):
+```json
+{
+  "token": "{...}"
+}
+```
+
 ### Testing the server
 
+### Running in Development Mode
 - Set the `SECRET_CLIENT_ID` inside `public/index.html` to match the same value inside `.env`
-- Run `node server.js` (or `npm start`)
-- Open your browser to `127.0.0.1:3000`
+- Run `npm run dev`
+- Open your browser to `http://127.0.0.1:3000`
+
+### Running in Production Mode
+- Run `npm start`
+- Set up an nginx `proxy_pass` to `http://127.0.0.1:3000`.
+
+
+### API
 
 #### Movies
 - Search for the exact name of a movie, like `The Avengers`.
 - Open the developer console and watch the links arrive.
 
-Calling the Movie API:
-- URL: `127.0.0.1:3000/api/search`
-- Querystrings required: <br>
-    `queryString`: movie title (exact name) <br>
-    `token`: valid JWT token
+**Calling the Movie API:**
+- Endpoint: `/api/v1/search/movies`
+- Method: `GET`
+- Parameters
+    - `title`: movie title (exact name) <br>
+    - `token`: valid JWT token
 
 
 #### TV
 - Search for a TV show by filling in name, season, episode. Eg: `Suits 4 1` (in the respective text boxes)
 - Open the developer console and watch the links arrive.
 
-Calling the TV API:
-- URL: `127.0.0.1:3000/api/search/tv`
-- Querystrings required: <br>
-    `show`: name of show <br>
-    `season`: season <br>
-    `episode`: episode <br>
-    `token`: valid JWT token
-
-## Notes
-
-Sometimes a host can lock a link to an IP address. This can sometimes be worked around by adding these headers to the request:
-```
-'x-real-ip': clientIp,
-'x-forwarded-for': clientIp,
-'true-client-ip': clientIp
-```
+**Calling the TV API:**
+- Endpoint: `/api/v1/search/tv`
+- Method: `GET`
+- Parameters
+    - `show`: name of show
+    - `season`: season
+    - `episode`: episode
+    - `token`: valid JWT token

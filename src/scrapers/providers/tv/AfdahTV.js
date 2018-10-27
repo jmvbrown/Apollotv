@@ -3,12 +3,12 @@ const cheerio = require('cheerio');
 const AES = require('crypto-js/aes');
 
 const Openload = require('../../resolvers/Openload');
-const padTvNumbers = require("../../utils/padTvNumbers");
+const utils = require("../../../utils/index");
 
 async function AfdahTV(req, sse) {
     const title = req.query.title;
-    const season = padTvNumbers(req.query.season);
-    const episode = padTvNumbers(req.query.episode);
+    const season = utils.padTvNumber(req.query.season);
+    const episode = utils.padTvNumber(req.query.episode);
 
     const url = 'https://afdah.to';
     const promises = [];
@@ -113,7 +113,7 @@ async function AfdahTV(req, sse) {
                     const providerUrl = /(?:src=')(.*)(?:' scrolling)/g.exec(decode)[1];
 
                     const videoSourceUrl = await Openload(providerUrl, jar);
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'result');
                 });
         } else {
             // Not working because the stream is a .m3u8 and I haven't found a player that will work.
@@ -132,7 +132,7 @@ async function AfdahTV(req, sse) {
 //                 // await page.screenshot({path: 'AfdahTV.png'});
 //                 const videoSourceUrl = await page.evaluate(() => window.player && window.player.getPlaylist()[0].file);
 //                 console.log(videoSourceUrl);
-//                 sse.send({videoSourceUrl, url, provider}, 'results');
+//                 sse.send({videoSourceUrl, url, provider}, 'result');
 //             }
 //
 //             sourceIds.filter(sourceId => !sourceId.startsWith('/trailer')).forEach(sourceId => {
@@ -174,9 +174,7 @@ function tor(txt) {
         }
 
         return buf;
-    } catch(err) {
-        return;
-    }
+    } catch(ignored) {}
 }
 
 module.exports = exports = AfdahTV;

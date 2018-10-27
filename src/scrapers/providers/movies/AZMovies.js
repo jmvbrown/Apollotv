@@ -60,10 +60,10 @@ async function AZMovies(req, sse) {
                 const providerUrl = $(element).attr('href');
                 if (providerUrl.includes('openload.co/embed')) {
                     const videoSourceUrl = await Openload(providerUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'result');
                 } else if (providerUrl.includes('streamango.com/embed')) {
                     const videoSourceUrl = await Streamango(providerUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://streamango.com', ipLocked: true}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://streamango.com', ipLocked: true}, 'result');
                 } else if (providerUrl.includes('files.azmovies.co')) {
                     const videoPageHtml = await rp({
                         uri: providerUrl,
@@ -94,10 +94,10 @@ async function AZMovies(req, sse) {
                     const streamUrl = videoStreamFileUrl.substr(0, videoStreamFileUrl.lastIndexOf('/') + 1);
                     const m3u8File = Buffer.from(videoStreamFile.replace(/az\d\d\d\.ts/g, `${streamUrl}$&`)).toString('base64');
 
-                    sse.send({m3u8File, url, provider: 'https://files.azmovies.co'}, 'results');
+                    sse.send({m3u8File, url, provider: 'https://files.azmovies.co'}, 'result');
                 } else if (providerUrl.includes('rapidvideo.com')) {
                     const videoSourceUrl = await RapidVideo(providerUrl, jar);
-                    sse.send({videoSourceUrl, url, provider: 'https://rapidvideo.com'}, 'results');
+                    sse.send({videoSourceUrl, url, provider: 'https://rapidvideo.com'}, 'result');
                 } else {
                     console.log('Still need a resolver for', providerUrl);
                 }
