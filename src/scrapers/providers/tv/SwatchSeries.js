@@ -19,6 +19,7 @@ const GamoVideo = require('../../resolvers/GamoVideo');
 const GorillaVid = require('../../resolvers/GorillaVid');
 const DaClips = require('../../resolvers/DaClips');
 const MovPod = require('../../resolvers/MovPod');
+const Vidoza = require('../../resolvers/Vidoza');
 
 async function SeriesFree(req, sse) {
     const clientIp = req.client.remoteAddress.startsWith('::ffff:') ? req.client.remoteAddress.replace('::ffff:', '') : req.client.remoteAddress;
@@ -93,7 +94,7 @@ async function SeriesFree(req, sse) {
                         // const videoSourceUrl = await Openload(`https://openload.co/embed/${videoId}`, jar, clientIp, userAgent);
                         // sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true, videoId, pairUrl: 'https://olpair.com'}, 'results');
 
-                    } else if (streamPageUrl.includes('vidlox.me')) {
+                    } else if (streamPageUrl.includes('vidlox.me') || streamPageUrl.includes('vidlox.tv')) {
                         // const videoSourceUrls = await Vidlox(streamPageUrl, jar, clientIp, userAgent);
                         // videoSourceUrls.forEach(source => sse.send({videoSourceUrl: source, url, provider: 'https://vidlox.me'}, 'results'));
 
@@ -169,8 +170,12 @@ async function SeriesFree(req, sse) {
                         // sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://daclips.in'}, 'results'));
 
                     } else if (streamPageUrl.includes('movpod.com') || streamPageUrl.includes('movpod.in')) {
-                        const sources = await MovPod(streamPageUrl, jar, clientIp, userAgent);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://movpod.in'}, 'results'));
+                        // const sources = await MovPod(streamPageUrl, jar, clientIp, userAgent);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://movpod.in'}, 'results'));
+
+                    } else if (streamPageUrl.includes('vidoza.net')) {
+                        const sources = await Vidoza(streamPageUrl, jar, clientIp, userAgent);
+                        sources.forEach(source => sse.send({videoSourceUrl: source.src, quality: source.res, url, provider: 'https://vidoza.net', ipLocked: true}, 'results'));
 
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
