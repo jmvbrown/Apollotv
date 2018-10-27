@@ -13,20 +13,20 @@ Install node^10.10.0 and npm^6.4.1.
 
 ### Security
 In order to authenticate with the server, the client must make a login
-request with the hashed (using the `bcrypt` library) `SECRET_CLIENT_ID` and the 
-current time. It will look like this before it's hashed: 
+request with the hashed (using the `bcrypt` library) `SECRET_CLIENT_ID` and the
+current time. It will look like this before it's hashed:
 
 `${current time in seconds}|${SECRET_CLIENT_ID}`
 
-The server then checks the resulting hash with it's own version starting the 
-second the request arrives to the server. It will check up to 5 seconds back in 
+The server then checks the resulting hash with it's own version starting the
+second the request arrives to the server. It will check up to 5 seconds back in
 time just in case the client has a slow connection.
 
-If the hash is valid within the time frame of 5 seconds, it is authorized and 
-the server sends a token down to the client that will last 1 hour. After the 
+If the hash is valid within the time frame of 5 seconds, it is authorized and
+the server sends a token down to the client that will last 1 hour. After the
 hour is up, the client will request another token.
 
-**Calling the authentication API:**  
+**Calling the authentication API:**
 
 *Logging in*
 
@@ -85,7 +85,62 @@ hour is up, the client will request another token.
 - Endpoint: `/api/v1/search/tv`
 - Method: `GET`
 - Parameters
-    - `show`: name of show  
-    - `season`: season  
-    - `episode`: episode  
+    - `show`: name of show
+    - `season`: season
+    - `episode`: episode
     - `token`: valid JWT token
+
+
+#### Event Structure
+```javascript
+{
+    // The event type
+    "event": "result",
+
+    // The link to the source.
+    "file": {
+        "link": "",
+        // m3u8 file: application/x-mpegURL
+        "kind": "",
+    },
+
+    // Pairing URL (but a last resort)
+    "pairing": "",
+
+    // Metadata
+    "metadata": {
+        // The link quality
+        "quality": "",
+
+        // The provider's name (human readable)
+        "provider": "",
+
+        // The source that uploaded the content to the provider (human readable)
+        "source": ""
+    },
+
+    // Required headers (last resort - may not even be possible)
+    "headers": {
+        "Referrer": ""
+    }
+}
+```
+
+```javascript
+{
+    // The event type
+    "event": "scrape",
+
+    // The provider URL that Claws needs the HTML from
+    "target": "",
+
+    // The resolver to send the HTML to
+    "resolver": "",
+
+    // Any cookies needed to access the provider URL
+    "cookies": {},
+
+    // Any headers needed to access the provider URL
+    "headers": {}
+}
+```

@@ -67,3 +67,11 @@ app.listen(process.env.PORT, () => {
     // Always binds to localhost.
     console.log(`${pkg.name} v${pkg.version} server listening on: http://127.0.0.1:${process.env.PORT}`);
 });
+
+// Test a resolver with the below code
+
+// const Openload = require('./resolvers/Openload');
+// (async function() {
+//  const videoSourceUrl = await Openload('https://openload.co/embed/WimYxMz-Wlk', require('request-promise').jar(), '77.111.246.9');
+//  console.log(videoSourceUrl);
+// })()
