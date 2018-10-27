@@ -16,6 +16,7 @@ const Vidzi = require('../../resolvers/Vidzi');
 const VidTodo = require('../../resolvers/VidTodo');
 const PowVideo = require('../../resolvers/PowVideo');
 const GamoVideo = require('../../resolvers/GamoVideo');
+const GorillaVid = require('../../resolvers/GorillaVid');
 
 async function SeriesFree(req, sse) {
     const clientIp = req.client.remoteAddress.startsWith('::ffff:') ? req.client.remoteAddress.replace('::ffff:', '') : req.client.remoteAddress;
@@ -85,42 +86,42 @@ async function SeriesFree(req, sse) {
             videoUrls.forEach(async (streamPageUrl) => {
                 try {
                     if (streamPageUrl.includes('openload.co')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1];
-                        const videoSourceUrl = await Openload(`https://openload.co/embed/${videoId}`, jar, clientIp, userAgent);
-                        sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true, videoId, pairUrl: 'https://olpair.com'}, 'results');
+                        // const path = streamPageUrl.split('/');
+                        // const videoId = path[path.length - 1];
+                        // const videoSourceUrl = await Openload(`https://openload.co/embed/${videoId}`, jar, clientIp, userAgent);
+                        // sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true, videoId, pairUrl: 'https://olpair.com'}, 'results');
 
                     } else if (streamPageUrl.includes('vidlox.me')) {
-                        const videoSourceUrls = await Vidlox(streamPageUrl, jar, clientIp, userAgent);
-                        videoSourceUrls.forEach(source => sse.send({videoSourceUrl: source, url, provider: 'https://vidlox.me'}, 'results'));
+                        // const videoSourceUrls = await Vidlox(streamPageUrl, jar, clientIp, userAgent);
+                        // videoSourceUrls.forEach(source => sse.send({videoSourceUrl: source, url, provider: 'https://vidlox.me'}, 'results'));
 
                     } else if (streamPageUrl.includes('vshare.eu')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1].replace('.htm', '');
-                        const videoSourceUrl = await VShare(`https://vshare.eu/embed-${videoId}.html`, jar, clientIp, userAgent);
-                        sse.send({videoSourceUrl, url, provider: 'https://vshare.eu', ipLocked: true, videoId, pairUrl: 'https://vshare.eu/pair'}, 'results');
+                        // const path = streamPageUrl.split('/');
+                        // const videoId = path[path.length - 1].replace('.htm', '');
+                        // const videoSourceUrl = await VShare(`https://vshare.eu/embed-${videoId}.html`, jar, clientIp, userAgent);
+                        // sse.send({videoSourceUrl, url, provider: 'https://vshare.eu', ipLocked: true, videoId, pairUrl: 'https://vshare.eu/pair'}, 'results');
 
                     } else if (streamPageUrl.includes('speedvid.net')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1];
-                        const videoSourceUrl = await SpeedVid(`http://speedvid.net/embed-${videoId}.html`, jar, clientIp, userAgent);
-                        sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results');
+                        // const path = streamPageUrl.split('/');
+                        // const videoId = path[path.length - 1];
+                        // const videoSourceUrl = await SpeedVid(`http://speedvid.net/embed-${videoId}.html`, jar, clientIp, userAgent);
+                        // sse.send({videoSourceUrl, url, provider: 'http://www.speedvid.net'}, 'results');
 
                     } else if (streamPageUrl.includes('vidcloud.co')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 2];
-                        const videoSourceUrls = await VidCloud(`https://vidcloud.co/player?fid=${videoId}&page=video`, jar, clientIp, userAgent);
-                        videoSourceUrls.forEach(source => {
-                            if (!!source.m3u8File) {
-                                sse.send({m3u8File: source.m3u8File, url, provider: 'https://vidcloud.co'}, 'results')
-                            } else {
-                                sse.send({videoSourceUrl: source.videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
-                            }
-                        });
+                        // const path = streamPageUrl.split('/');
+                        // const videoId = path[path.length - 2];
+                        // const videoSourceUrls = await VidCloud(`https://vidcloud.co/player?fid=${videoId}&page=video`, jar, clientIp, userAgent);
+                        // videoSourceUrls.forEach(source => {
+                        //     if (!!source.m3u8File) {
+                        //         sse.send({m3u8File: source.m3u8File, url, provider: 'https://vidcloud.co'}, 'results')
+                        //     } else {
+                        //         sse.send({videoSourceUrl: source.videoSourceUrl, url, provider: 'https://vidcloud.co'}, 'results')
+                        //     }
+                        // });
 
                     } else if (streamPageUrl.includes('clipwatching.com')) {
-                        const sources = await ClipWatching(streamPageUrl, jar, clientIp, userAgent);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results'));
+                        // const sources = await ClipWatching(streamPageUrl, jar, clientIp, userAgent);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, provider: 'http://clipwatching.com'}, 'results'));
 
                     } else if (streamPageUrl.includes('estream.to') || streamPageUrl.includes('estream.xyz')) {
                         // const path = streamPageUrl.split('/');
@@ -140,22 +141,26 @@ async function SeriesFree(req, sse) {
                     } else if (streamPageUrl.includes('vidup.me') || streamPageUrl.includes('vidup.tv') || streamPageUrl.includes('thevideo.me')) {
                         // console.log('Skipping vidup.me because captcha');
 
-                    } else if (streamPageUrl.includes('vidtodo.me')) {
-                        const sources = await VidTodo(streamPageUrl, jar, clientIp, userAgent);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, referer: streamPageUrl.replace('vidtodo.me', 'vidstodo.me'), provider: 'https://vidtodo.me'}, 'results'));
+                    } else if (streamPageUrl.includes('vidtodo.me') || streamPageUrl.includes('vidtodo.com')) {
+                        // const sources = await VidTodo(streamPageUrl, jar, clientIp, userAgent);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.file, quality: source.label, url, referer: streamPageUrl.replace('vidtodo.me', 'vidstodo.me'), provider: 'https://vidtodo.me'}, 'results'));
 
                     } else if (streamPageUrl.includes('powvideo.net')) {
-                        const path = streamPageUrl.split('/');
-                        const videoId = path[path.length - 1];
-                        const sources = await PowVideo(`https://povwideo.cc/iframe-${videoId}-954x562.html`, jar, clientIp, userAgent, videoId);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.file, url, provider: 'https://powvideo.net', ipLocked: true}, 'results'));
+                        // const path = streamPageUrl.split('/');
+                        // const videoId = path[path.length - 1];
+                        // const sources = await PowVideo(`https://povwideo.cc/iframe-${videoId}-954x562.html`, jar, clientIp, userAgent, videoId);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.file, url, provider: 'https://powvideo.net', ipLocked: true}, 'results'));
 
                     } else if (streamPageUrl.includes('streamplay.to')) {
                         // console.log('Skipping streamplay.to because captcha.');
 
                     } else if (streamPageUrl.includes('gamovideo.com')) {
-                        const sources = await GamoVideo(streamPageUrl, jar, clientIp, userAgent);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.file, url, provider: 'http://gamovideo.com', ipLocked: true}, 'results'));
+                        // const sources = await GamoVideo(streamPageUrl, jar, clientIp, userAgent);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.file, url, provider: 'http://gamovideo.com', ipLocked: true}, 'results'));
+
+                    } else if (streamPageUrl.includes('gorillavid.com') || streamPageUrl.includes('gorillavid.in')) {
+                        const sources = await GorillaVid(streamPageUrl, jar, clientIp, userAgent);
+                        sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://gorillavid.in'}, 'results'));
 
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
