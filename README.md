@@ -89,3 +89,58 @@ hour is up, the client will request another token.
     - `season`: season
     - `episode`: episode
     - `token`: valid JWT token
+
+
+#### Event Structure
+```javascript
+{
+    // The event type
+    "event": "result",
+
+    // The link to the source.
+    "file": {
+        "link": "",
+        // m3u8 file: application/x-mpegURL
+        "kind": "",
+    },
+
+    // Pairing URL (but a last resort)
+    "pairing": "",
+
+    // Metadata
+    "metadata": {
+        // The link quality
+        "quality": "",
+
+        // The provider's name (human readable)
+        "provider": "",
+
+        // The source that uploaded the content to the provider (human readable)
+        "source": ""
+    },
+
+    // Required headers (last resort - may not even be possible)
+    "headers": {
+        "Referrer": ""
+    }
+}
+```
+
+```javascript
+{
+    // The event type
+    "event": "scrape",
+
+    // The provider URL that Claws needs the HTML from
+    "target": "",
+
+    // The resolver to send the HTML to
+    "resolver": "",
+
+    // Any cookies needed to access the provider URL
+    "cookies": {},
+
+    // Any headers needed to access the provider URL
+    "headers": {}
+}
+```

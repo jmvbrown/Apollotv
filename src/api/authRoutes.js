@@ -1,7 +1,7 @@
 'use strict';
 
 // Import dependencies
-const bcrypt = require('bcrypt');
+const bcrypt = require('../../public/bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Define constants
