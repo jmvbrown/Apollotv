@@ -15,8 +15,6 @@ async function DaClips(uri, jar, clientIp, userAgent) {
 
     let $ = cheerio.load(videoSourceHtml);
 
-    console.log(uri, $('script:contains("sources")').length);
-
     if (!$('script:contains("sources")').length) {
         const videoPageHtml = await rp({
             uri: uri.replace('http:', 'https:'),
@@ -32,8 +30,6 @@ async function DaClips(uri, jar, clientIp, userAgent) {
 
         $ = cheerio.load(videoPageHtml);
     }
-
-    console.log(uri, $('script:contains("sources")').length);
 
     let videoOptions = {};
     const videojs = function(ignoreThis, options) {
@@ -51,7 +47,6 @@ async function DaClips(uri, jar, clientIp, userAgent) {
     };
     vm.createContext(sandbox); // Contextify the sandbox.
     vm.runInContext($('script:contains("sources")')[0].children[0].data, sandbox);
-    console.log(uri, videoOptions.sources);
     return videoOptions.sources;
 }
 

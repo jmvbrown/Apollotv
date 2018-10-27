@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function GorillaVid(uri, jar, clientIp, userAgent) {
+async function MovPod(uri, jar, clientIp, userAgent) {
     const videoSourceHtml = await rp({
         uri,
         headers: {
@@ -42,11 +42,12 @@ async function GorillaVid(uri, jar, clientIp, userAgent) {
     videojs.options = {flash: {}};
     const sandbox = {
         videojs,
-        window: {location: {href: {match(){ return false; }}}}
+        window: {location: {href: {match(){ return false; }}}},
+        playlistMonitor: null
     };
     vm.createContext(sandbox); // Contextify the sandbox.
     vm.runInContext($('script:contains("sources")')[0].children[0].data, sandbox);
     return videoOptions.sources;
 }
 
-module.exports = exports = GorillaVid;
+module.exports = exports = MovPod;

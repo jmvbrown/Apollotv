@@ -18,6 +18,7 @@ const PowVideo = require('../../resolvers/PowVideo');
 const GamoVideo = require('../../resolvers/GamoVideo');
 const GorillaVid = require('../../resolvers/GorillaVid');
 const DaClips = require('../../resolvers/DaClips');
+const MovPod = require('../../resolvers/MovPod');
 
 async function SeriesFree(req, sse) {
     const clientIp = req.client.remoteAddress.startsWith('::ffff:') ? req.client.remoteAddress.replace('::ffff:', '') : req.client.remoteAddress;
@@ -164,8 +165,12 @@ async function SeriesFree(req, sse) {
                         // sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://gorillavid.in'}, 'results'));
 
                     } else if (streamPageUrl.includes('daclips.com') || streamPageUrl.includes('daclips.in')) {
-                        const sources = await DaClips(streamPageUrl, jar, clientIp, userAgent);
-                        sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://daclips.in'}, 'results'));
+                        // const sources = await DaClips(streamPageUrl, jar, clientIp, userAgent);
+                        // sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://daclips.in'}, 'results'));
+
+                    } else if (streamPageUrl.includes('movpod.com') || streamPageUrl.includes('movpod.in')) {
+                        const sources = await MovPod(streamPageUrl, jar, clientIp, userAgent);
+                        sources.forEach(source => sse.send({videoSourceUrl: source.src, url, provider: 'https://movpod.in'}, 'results'));
 
                     } else {
                         console.log('Still need a resolver for', streamPageUrl);
