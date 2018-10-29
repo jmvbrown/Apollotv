@@ -17,7 +17,7 @@ const PowVideo = require('../../resolvers/PowVideo');
 const GamoVideo = require('../../resolvers/GamoVideo');
 
 async function SeriesFree(req, sse) {
-    const clientIp = req.client.remoteAddress.startsWith('::ffff:') ? req.client.remoteAddress.replace('::ffff:', '') : req.client.remoteAddress;
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')
     const showTitle = req.query.title;
     const {season, episode} = req.query;
 

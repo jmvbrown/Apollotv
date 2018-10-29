@@ -2,12 +2,10 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function Openload(uri, jar, clientIp, userAgent) {
+async function Openload(uri, jar, headers) {
     let providerPageHtml = await rp({
         uri,
-        headers: {
-            'user-agent': userAgent,
-        },
+        headers,
         jar,
         followAllRedirects: true,
         timeout: 5000

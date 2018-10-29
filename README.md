@@ -136,11 +136,5 @@ hour is up, the client will request another token.
 
     // The resolver to send the HTML to
     "resolver": "",
-
-    // Any cookies needed to access the provider URL
-    "cookies": {},
-
-    // Any headers needed to access the provider URL
-    "headers": {}
 }
 ```
