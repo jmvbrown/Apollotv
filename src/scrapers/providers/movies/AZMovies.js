@@ -3,9 +3,6 @@ const cheerio = require('cheerio');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
-// const Openload = require('../../resolvers/Openload');
-// const Streamango = require('../../resolvers/Streamango');
-// const RapidVideo = require('../../resolvers/RapidVideo');
 const resolve = require('../../resolvers/resolve');
 
 async function AZMovies(req, sse) {

@@ -3,8 +3,8 @@
 const providers =
 	{
 		movies: [
-			// require('./movies/Afdah'),
-			require('./movies/AZMovies'),
+			require('./movies/Afdah'),
+			// require('./movies/AZMovies'),
 		],
 		tv: [
 			// require('./tv/AfdahTV'),
