@@ -6,7 +6,7 @@ const randomUseragent = require('random-useragent');
 const resolve = require('../../resolvers/resolve');
 
 async function AZMovies(req, sse) {
-    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
     const movieTitle = req.query.title;
 
     // These are all the same host I think. https://xmovies8.org isn't loading.

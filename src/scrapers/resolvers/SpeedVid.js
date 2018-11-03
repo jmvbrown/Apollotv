@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function SpeedVid(uri, jar, clientIp, userAgent) {
+async function SpeedVid(uri, jar, {userAgent}) {
     const videoPageHtml = await rp({
         uri,
         headers: {

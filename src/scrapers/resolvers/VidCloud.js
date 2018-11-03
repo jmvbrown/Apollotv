@@ -5,7 +5,7 @@ const vm = require('vm');
 const URL = require('url');
 const m3u8 = require('m3u8-stream-list');
 
-async function VidCloud(uri, jar, clientIp, userAgent) {
+async function VidCloud(uri, jar, {userAgent}) {
     const videoSourceObject = await rp({
         uri,
         headers: {
@@ -25,7 +25,7 @@ async function VidCloud(uri, jar, clientIp, userAgent) {
     const promises = [];
     const sources = [];
     async function resolveHarder(source) {
-        const m3u8File = await rp({
+        const file = await rp({
             uri: source,
             headers: {
                 'user-agent': userAgent,
@@ -33,7 +33,7 @@ async function VidCloud(uri, jar, clientIp, userAgent) {
             jar,
             timeout: 5000
         });
-        sources.push({m3u8File: m3u8File.replace(/seg/g, `${source.split('/').slice(0,-1).join('/')}/seg`)});
+        sources.push({file: Buffer.from(file.replace(/seg/g, `${source.split('/').slice(0,-1).join('/')}/seg`)).toString('base64')});
     }
 
     async function resolve(source) {
@@ -50,7 +50,7 @@ async function VidCloud(uri, jar, clientIp, userAgent) {
             const parsedPlaylist = m3u8(playlist);
             return Promise.all(parsedPlaylist.map(item => resolveHarder(item.url)));
         } else {
-            sources.push({videoSourceUrl: source.file});
+            sources.push({link: source.file});
         }
     }
 

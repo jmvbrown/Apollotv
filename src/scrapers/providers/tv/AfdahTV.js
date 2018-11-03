@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const AES = require('crypto-js/aes');
 
-const Openload = require('../../resolvers/Openload');
+const resolve = require('../../resolvers/resolve');
 const utils = require("../../../utils/index");
 
 async function AfdahTV(req, sse) {
@@ -10,6 +10,11 @@ async function AfdahTV(req, sse) {
     const season = utils.padTvNumber(req.query.season);
     const episode = utils.padTvNumber(req.query.episode);
 
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
+    const headers = {
+        'x-real-ip': clientIp,
+        'x-forwarded-for': clientIp
+    };
     const url = 'https://afdah.to';
     const promises = [];
     var jar = rp.jar();
@@ -17,10 +22,7 @@ async function AfdahTV(req, sse) {
     try {
         const html = await rp({
             uri: `${url}/wp-content/themes/afdah/ajax-search2.php`,
-            headers: {
-                'x-real-ip': req.client.remoteAddress,
-                'x-forwarded-for': req.client.remoteAddress
-            },
+            headers,
             method: 'POST',
             form: {
                 process: AES.encrypt(title + '|||' + 'title', "Watch Movies Online").toString()
@@ -44,10 +46,7 @@ async function AfdahTV(req, sse) {
 
         const videoPageHtml = await rp({
             uri: `${url}${videoId}`,
-            headers: {
-                'x-real-ip': req.client.remoteAddress,
-                'x-forwarded-for': req.client.remoteAddress
-            },
+            headers,
             jar,
             timeout: 5000
         });
@@ -59,10 +58,7 @@ async function AfdahTV(req, sse) {
 
             const videoPageHtml = await rp({
                 uri: `${url}${episodeUrl}`,
-                headers: {
-                    'x-real-ip': req.client.remoteAddress,
-                    'x-forwarded-for': req.client.remoteAddress
-                },
+                headers,
                 jar,
                 timeout: 5000
             });
@@ -109,14 +105,19 @@ async function AfdahTV(req, sse) {
                     //          'debridonly': False})
 
                     const code = /salt\("([^"]+)/g.exec(videoPageHtml)[1];
-                    const decode = tor(Buffer.from(tor(code), 'base64').toString('ascii'));
-                    const providerUrl = /(?:src=')(.*)(?:' scrolling)/g.exec(decode)[1];
+                    let decode = tor(Buffer.from(tor(code), 'base64').toString('ascii'));
+                    let providerRegex = /(?:src=')(.*)(?:' scrolling)/g.exec(decode);
+                    if (providerRegex) {
+                        resolve(sse, providerRegex[1], 'AfdahTV', jar);
+                    } else {
+                        decode = Buffer.from(tor(Buffer.from(code, 'base64').toString('ascii')), 'base64').toString('ascii');
+                        providerRegex = /(?:src=')(.*)(?:' scrolling)/g.exec(decode);
+                        resolve(sse, providerRegex[1], 'AfdahTV', jar);
+                    }
 
-                    const videoSourceUrl = await Openload(providerUrl, jar);
-                    sse.send({videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true}, 'result');
                 });
         } else {
-            // Not working because the stream is a .m3u8 and I haven't found a player that will work.
+            // Not working because the stream is a peer-to-peer .m3u8 and I haven't found a player that will work.
 
 //             const page = await browser.newPage();
 //             await page.goto(`${url}${videoId}`);

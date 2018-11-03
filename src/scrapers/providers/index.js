@@ -3,13 +3,13 @@
 const providers =
 	{
 		movies: [
-			require('./movies/Afdah'),
+			// require('./movies/Afdah'),
 			// require('./movies/AZMovies'),
 		],
 		tv: [
 			// require('./tv/AfdahTV'),
 			// require('./tv/GoWatchSeries'),
-			// require('./tv/SeriesFree'),
+			require('./tv/SeriesFree'),
 			// require('./tv/SwatchSeries'),
 		],
 		universal: [

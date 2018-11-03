@@ -1,10 +1,10 @@
 const URL = require('url');
 
-function createEvent(link, ipLocked, pairing, quality, provider, source, headers) {
+function createEvent(data, ipLocked, pairing, quality, provider, source, headers) {
 	if (ipLocked && process.env.NODE_ENV === 'production') {
 		return {
 		    event: 'scrape',
-		    target: link,
+		    target: data,
 		    resolver: provider
 		}
 	}
@@ -12,8 +12,8 @@ function createEvent(link, ipLocked, pairing, quality, provider, source, headers
 	return {
 	    event: 'result',
 	    file: {
-	        link,
-	        kind: getMimeType(link),
+	        data,
+	        kind: getDataKind(data),
 	    },
 	    pairing,
 	    metadata: {
@@ -25,7 +25,7 @@ function createEvent(link, ipLocked, pairing, quality, provider, source, headers
 	};
 }
 
-function getMimeType(link) {
+function getDataKind(link) {
 	const file = URL.parse(link).pathname;
 
 	if (file.endsWith('.mp4')) {
@@ -34,6 +34,8 @@ function getMimeType(link) {
 		return 'application/x-mpegURL';
 	} else if (file.endsWith('.mkv')) {
 		return 'video/x-matroska';
+	} else if (file.endsWith('==')) {
+		return 'file';
 	} else {
 		return 'video/*';
 	}

@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function GamoVideo(uri, jar, clientIp, userAgent, videoId) {
+async function GamoVideo(uri, jar, {userAgent}) {
     const videoPageHtml = await rp({
         uri,
         headers: {

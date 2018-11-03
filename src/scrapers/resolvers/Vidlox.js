@@ -2,14 +2,10 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function Vidlox(uri, jar, clientIp, userAgent) {
+async function Vidlox(uri, jar, headers) {
     const videoSourceHtml = await rp({
         uri,
-        headers: {
-            'user-agent': userAgent,
-            'x-real-ip': clientIp,
-            'x-forwarded-for': clientIp
-        },
+        headers,
         jar,
         timeout: 5000
     });

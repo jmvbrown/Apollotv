@@ -2,17 +2,15 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function PowVideo(uri, jar, clientIp, userAgent, videoId) {
+async function PowVideo(uri, jar, headers, videoId) {
     const videoSourceHtml = await rp({
         uri,
         headers: {
-            'user-agent': userAgent,
+            ...headers,
             referer: `https://povwideo.cc/preview-${videoId}-954x562.html`,
             'cache-control': 'no-cache',
             'pragma': 'no-cache',
             'upgrade-insecure-requests': '1',
-            'x-real-ip': clientIp,
-            'x-forwarded-for': clientIp
         },
         jar,
         timeout: 5000
