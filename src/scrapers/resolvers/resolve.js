@@ -19,9 +19,9 @@ async function resolve(sse, uri, source, jar, headers) {
 	console.log(uri);
 	try {
 		if (uri.includes('openload.co') || uri.includes('oload.cloud')) {
+			const path = uri.split('/');
+			const videoId = path[path.length - 1]
 			if (!uri.includes('embed')) {
-				const path = uri.split('/');
-				const videoId = path[path.length - 1];
             	uri = `https://openload.co/embed/${videoId}`;
 			}
 	        const data = await Openload(uri, jar, headers);
@@ -51,9 +51,10 @@ async function resolve(sse, uri, source, jar, headers) {
             });
 
         } else if (uri.includes('vshare.eu')) {
+        	const path = uri.split('/');
+        	let videoId = path[path.length - 1].replace('.html', '');
         	if (!uri.includes('embed')) {
-				const path = uri.split('/');
-            	const videoId = path[path.length - 1].replace('.htm', '');
+            	videoId = path[path.length - 1].replace('.htm', '');
             	uri = `https://vshare.eu/embed-${videoId}.html`;
 			}
             const data = await VShare(uri, jar, headers);
