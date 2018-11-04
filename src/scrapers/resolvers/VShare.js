@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function VShare(uri, jar, clientIp, userAgent) {
+async function VShare(uri, jar, {'user-agent': userAgent}) {
     const videoSourceHtml = await rp({
         uri,
         headers: {

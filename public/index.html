@@ -235,7 +235,10 @@
                 let token = await authenticate();
                 var movieTitle = document.getElementById('movieTitle').value;
                 es = new EventSource(`/api/v1/search/movies?title=${movieTitle}&token=${token}`);
-                es.addEventListener('results', function (e) {
+                es.addEventListener('result', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('scrape', function (e) {
                     console.log(e.data);
                 });
                 es.addEventListener('error', function (e) {
@@ -249,7 +252,10 @@
                 var episode = document.getElementById('episode').value;
 
                 es = new EventSource(`/api/v1/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
-                es.addEventListener('results', function (e) {
+                es.addEventListener('result', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('scrape', function (e) {
                     console.log(e.data);
                 });
                 es.addEventListener('error', function (e) {

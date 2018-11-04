@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function MovPod(uri, jar, clientIp, userAgent) {
+async function MovPod(uri, jar, {'user-agent': userAgent}) {
     const videoSourceHtml = await rp({
         uri,
         headers: {

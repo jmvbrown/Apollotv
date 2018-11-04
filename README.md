@@ -99,13 +99,16 @@ hour is up, the client will request another token.
 
     // The link to the source.
     "file": {
-        "link": "",
-        // m3u8 file: application/x-mpegURL
+        "data": "",
+        // Mime type or `file` for a base64 encoded m3u8 file
         "kind": "",
     },
 
-    // Pairing URL (but a last resort)
-    "pairing": "",
+    // Pairing (but a last resort)
+    "pairing": {
+        url: '',
+        videoId: ''
+    },
 
     // Metadata
     "metadata": {
@@ -136,11 +139,5 @@ hour is up, the client will request another token.
 
     // The resolver to send the HTML to
     "resolver": "",
-
-    // Any cookies needed to access the provider URL
-    "cookies": {},
-
-    // Any headers needed to access the provider URL
-    "headers": {}
 }
 ```

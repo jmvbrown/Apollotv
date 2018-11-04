@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 
-const Openload = require('../../resolvers/Openload');
+const resolve = require('../../resolvers/resolve');
 
 async function Afdah(req, sse) {
     const movieTitle = req.query.title;
@@ -117,19 +117,17 @@ async function Afdah(req, sse) {
                     timeout: 5000
                 });
 
-                const cleanedObfuscatedSources = obfuscatedSources
-                    .replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`);
-
+                const cleanedObfuscatedSources = obfuscatedSources.replace('return(c35?String', `return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String`);
 
                 try {
                     const vm = require('vm');
                     const sandbox = {window: {checkSrc: function(){}}}; // starting variables
                     vm.createContext(sandbox); // Contextify the sandbox.
                     vm.runInContext(cleanedObfuscatedSources, sandbox);
-                    videoSourceUrl = sandbox.window.srcs[0].url;
-                    videoSourceSize = sandbox.window.srcs[0].size;
 
-                    sse.send({videoSourceUrl, provider: url}, 'result');
+                    const link = sandbox.window.srcs[0].url;
+                    const event = createEvent(link, false, {}, '', 'Vidlink', 'Afdah');
+                    sse.send(event, event.event);
                 } catch(err) {
                     const openloadData = await rp({
                         uri: ' https://vidlink.org/opl/info',
@@ -154,19 +152,16 @@ async function Afdah(req, sse) {
                         timeout: 5000
                     });
 
-                    const openloadUrl = `https://oload.cloud/embed/${openloadData.id}`;
-                    const videoSourceUrl = await Openload(openloadUrl, jar, req.client.remoteAddress);
-                    sse.send({videoSourceUrl, url, provider: 'https://oload.cloud', ipLocked: true}, 'result');
+                    const headers = {
+                        'user-agent': userAgent,
+                    };
+                    const providerUrl = `https://oload.cloud/embed/${openloadData.id}`;
+
+                    resolve(sse, providerUrl, 'Afdah', jar, headers);
                 }
             }
-
-
         } catch (err) {
-            console.log(err);
-            if (err.cause && err.cause.code !== 'ETIMEDOUT') {
-                console.error(err);
-                sse.send({url, message: 'Looks like this provider is down.'}, 'error');
-            }
+            console.error(err);
         }
     }
 
