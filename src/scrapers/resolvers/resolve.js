@@ -167,6 +167,11 @@ async function resolve(sse, uri, source, jar, headers) {
 
         } else if (uri.includes('vidoza.net')) {
             // FIXME: I think a throttle is happening here.
+            if (!uri.includes('embed')) {
+                const path = uri.split('/');
+                const videoId = path[3].replace('.html', '');
+                uri = `https://vidoza.net/embed-${videoId}.html`;
+            }
             const dataObjects = await Vidoza(uri, jar, headers);
             dataObjects.forEach(dataObject => {
                 const event = createEvent(dataObject.src, true, {}, dataObject.res, 'Vidoza', source);

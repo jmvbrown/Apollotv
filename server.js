@@ -70,8 +70,14 @@ app.listen(process.env.PORT, () => {
 
 // Test a resolver with the below code
 
-// const Openload = require('./resolvers/Openload');
+// const Vidoza = require('./src/scrapers/resolvers/Vidoza');
 // (async function() {
-//  const videoSourceUrl = await Openload('https://openload.co/embed/WimYxMz-Wlk', require('request-promise').jar(), '77.111.246.9');
+//  const videoSourceUrl = await Vidoza('http://vidoza.net/embed-9srjo96k713x.html', require('request-promise').jar(), {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:63.0) Gecko/20100101 Firefox/63.0'});
 //  console.log(videoSourceUrl);
+// })()
+
+// const rp = require('request-promise');
+// (async function() {
+//     const [html1, html2] = await Promise.all([rp({uri: 'http://vidoza.net/embed-9srjo96k713x.html', timeout: 5000}), rp({uri: 'http://vidoza.net/embed-9srjo96k713x.html', timeout: 5000})]);
+//     console.log(html1, html2);
 // })()
