@@ -30,5 +30,13 @@ module.exports = {
             req.userId = decoded.id;
             next();
         });
+    },
+
+    /**
+     * Creates a promise for setTimeout
+     * @param ms The time in miliseconds to wait.
+     */
+    timeout: (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 };

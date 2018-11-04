@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function Vidoza(uri, jar, clientIp, userAgent) {
+async function Vidoza(uri, jar, {'user-agent': userAgent}) {
     const videoPageHtml = await rp({
         uri,
         headers: {

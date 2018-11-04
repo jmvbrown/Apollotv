@@ -6,10 +6,7 @@ async function AfdahTV(uri, jar, headers) {
     const videoPageHtml = await rp({
         uri: `${url}${serverUrl}`,
         method: 'POST',
-        headers: {
-            'x-real-ip': req.client.remoteAddress,
-            'x-forwarded-for': req.client.remoteAddress
-        },
+        headers,
         formData: {
             play: 'continue',
             x: 715,

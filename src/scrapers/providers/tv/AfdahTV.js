@@ -3,12 +3,12 @@ const cheerio = require('cheerio');
 const AES = require('crypto-js/aes');
 
 const resolve = require('../../resolvers/resolve');
-const utils = require("../../../utils/index");
+const {padTvNumber} = require('../../../utils');
 
 async function AfdahTV(req, sse) {
     const title = req.query.title;
-    const season = utils.padTvNumber(req.query.season);
-    const episode = utils.padTvNumber(req.query.episode);
+    const season = padTvNumber(req.query.season);
+    const episode = padTvNumber(req.query.episode);
 
     const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
     const headers = {

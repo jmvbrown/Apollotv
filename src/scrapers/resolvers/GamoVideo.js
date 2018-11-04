@@ -2,12 +2,15 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function GamoVideo(uri, jar, {userAgent}) {
+// I think there's some throttling going on, but haven't tested enough to find the time span for a "ban" reset
+
+async function GamoVideo(uri, jar, {'user-agent': userAgent}) {
     const videoPageHtml = await rp({
         uri,
         headers: {
             'user-agent': userAgent,
-            'Upgrade-Insecure-Requests': 1
+            'Upgrade-Insecure-Requests': 1,
+            Host: 'gamovideo.com'
         },
         followAllRedirects: true,
         jar,
@@ -24,7 +27,7 @@ async function GamoVideo(uri, jar, {userAgent}) {
     const sources = [];
     setupObject.playlist.forEach(listItem => listItem.sources.forEach(source => sources.push(source.file)));
 
-    return sources;
+    return sources.filter(source => !source.startsWith('rtmp'));
 }
 
 module.exports = exports = GamoVideo;

@@ -2,7 +2,7 @@
 
 // Import dependencies
 const SSE = require('express-sse');
-const utils = require('../utils/index');
+const {verifyToken} = require('../utils');
 
 // Load providers
 const providers = require('../scrapers/providers');
@@ -20,7 +20,7 @@ const sendInitialStatus = (sse) => sse.send({ data: [`${new Date().getTime()}`],
  * ------
  * Allows you to search for movies.
  */
-searchRoutes.get('/movies', utils.verifyToken, (req, res) => {
+searchRoutes.get('/movies', verifyToken, (req, res) => {
     const sse = new SSE();
     sse.init(req, res);
     sendInitialStatus(sse);
@@ -34,7 +34,7 @@ searchRoutes.get('/movies', utils.verifyToken, (req, res) => {
  * ------
  * Allows you to search for TV shows.
  */
-searchRoutes.get('/tv', utils.verifyToken, (req, res) => {
+searchRoutes.get('/tv', verifyToken, (req, res) => {
     const sse = new SSE();
     sse.init(req, res);
     sendInitialStatus(sse);

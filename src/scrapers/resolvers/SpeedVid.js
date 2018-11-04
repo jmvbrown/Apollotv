@@ -2,7 +2,7 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function SpeedVid(uri, jar, {userAgent}) {
+async function SpeedVid(uri, jar, {'user-agent': userAgent}) {
     const videoPageHtml = await rp({
         uri,
         headers: {
@@ -38,11 +38,11 @@ async function SpeedVid(uri, jar, {userAgent}) {
 
     $ = cheerio.load(videoSourceHtml);
 
-    let setupObject = {};
-    sandbox = {jwplayer(){ return {setup(value){ setupObject = value; }} }, primary: true};
-    vm.createContext(sandbox); // Contextify the sandbox.
-    vm.runInContext($(`script:contains("jwplayer('vplayer').setup")`)[0].children[0].data, sandbox);
-    return setupObject.file;
+    const links = {};
+
+    $('source').toArray().forEach(source => links[$(source).attr('src')] = true);
+
+    return Object.keys(links);
 }
 
 module.exports = exports = SpeedVid;
