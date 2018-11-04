@@ -29,12 +29,12 @@ async function resolve(sse, uri, source, jar, headers) {
                 uri = `https://openload.co/embed/${videoId}`;
             }
             const data = await Openload(uri, jar, headers);
-            const event = createEvent(data, true, {url: 'https://olpair.com', videoId}, '', 'Openload', source);
+            const event = createEvent(data, true, {url: 'https://olpair.com', videoId, target: uri}, '', 'Openload', source);
             sse.send(event, event.event);
 
         } else if (uri.includes('streamango.com')) {
             const data = await Streamango(uri, jar, headers);
-            const event = createEvent(data, true, {}, '', 'Streamango', source);
+            const event = createEvent(data, true, {target: uri}, '', 'Streamango', source);
             sse.send(event, event.event);
 
         } else if (uri.includes('rapidvideo.com')) {
@@ -62,7 +62,7 @@ async function resolve(sse, uri, source, jar, headers) {
                 uri = `https://vshare.eu/embed-${videoId}.html`;
             }
             const data = await VShare(uri, jar, headers);
-            const event = createEvent(data, true, {url: 'https://vshare.eu/pair', videoId}, '', 'VShare', source);
+            const event = createEvent(data, true, {url: 'https://vshare.eu/pair', videoId, target: uri}, '', 'VShare', source);
             sse.send(event, event.event);
 
         } else if (uri.includes('speedvid.net')) {
@@ -130,7 +130,7 @@ async function resolve(sse, uri, source, jar, headers) {
             }
             const dataObjects = await PowVideo(uri, jar, headers, videoId);
             dataObjects.forEach(dataObject => {
-                const event = createEvent(!!dataObject.file ? dataObject.file : dataObject.link, true, {}, '', 'PowVideo', source);
+                const event = createEvent(!!dataObject.file ? dataObject.file : dataObject.link, true, {target: uri}, '', 'PowVideo', source);
                 sse.send(event, event.event);
             });
 
@@ -140,7 +140,7 @@ async function resolve(sse, uri, source, jar, headers) {
         } else if (uri.includes('gamovideo.com')) {
             const dataList = await GamoVideo(uri, jar, headers);
             dataList.forEach(data => {
-                const event = createEvent(data, true, {}, '', 'GamoVideo', source);
+                const event = createEvent(data, true, {target: uri}, '', 'GamoVideo', source);
                 sse.send(event, event.event);
             });
 
@@ -173,7 +173,7 @@ async function resolve(sse, uri, source, jar, headers) {
             }
             const dataObjects = await Vidoza(uri, jar, headers);
             dataObjects.forEach(dataObject => {
-                const event = createEvent(dataObject.src, true, {}, dataObject.res, 'Vidoza', source);
+                const event = createEvent(dataObject.src, true, {target: uri}, dataObject.res, 'Vidoza', source);
                 sse.send(event, event.event);
             });
 

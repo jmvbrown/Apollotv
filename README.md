@@ -108,6 +108,7 @@ hour is up, the client will request another token.
     "pairing": {
         url: '',
         videoId: ''
+        target: ''
     },
 
     // Metadata
