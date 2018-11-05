@@ -1,4 +1,4 @@
-const Openload = require('./Openload');
+const {Openload} = require('./Openload');
 const Streamango = require('./Streamango');
 const RapidVideo = require('./RapidVideo');
 const AZMovies = require('./AZMovies');

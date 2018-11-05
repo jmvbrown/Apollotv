@@ -59,6 +59,9 @@ app.use('/api/v1', authRoutes);
 
 const searchRoutes = require('./src/api/searchRoutes');
 app.use('/api/v1/search', searchRoutes);
+
+const resolveRoutes = require('./src/api/resolveRoutes');
+app.use('/api/v1/resolve', resolveRoutes);
 /** ./API ROUTES **/
 
 

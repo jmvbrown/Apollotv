@@ -7,7 +7,7 @@ const randomUseragent = require('random-useragent');
 const tough = require('tough-cookie');
 const vm = require('vm');
 
-const Openload = require('../../resolvers/Openload');
+const {Openload} = require('../../resolvers/Openload');
 
 async function GoWatchSeries(req, sse) {
     const showTitle = req.query.title.toLowerCase();
