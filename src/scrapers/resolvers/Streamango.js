@@ -2,13 +2,10 @@ const rp = require('request-promise');
 const cheerio = require('cheerio');
 const vm = require('vm');
 
-async function Streamango(uri, jar, clientIp) {
+async function Streamango(uri, jar, headers) {
     let providerPageHtml = await rp({
         uri,
-        headers: {
-            'x-real-ip': clientIp,
-            'x-forwarded-for': clientIp
-        },
+        headers,
         jar,
         timeout: 5000
     });

@@ -1,3 +1,5 @@
+'use strict';
+
 const providers =
 	{
 		movies: [
@@ -9,6 +11,7 @@ const providers =
 			// require('./tv/SeriesFree'),
 			// require('./tv/AfdahTV'),
 			require('./tv/Series8'),
+			// require('./tv/SwatchSeries'),
 		],
 		universal: [
 		]

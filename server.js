@@ -1,21 +1,22 @@
 'use strict';
 
+// Import dependencies
 const express = require('express');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const api = require('./api');
-const verifyToken = require('./api');
-const morgan = require('morgan')
-const logger = require('./utils/logger')
+const logger = require('./src/utils/logger');
 
+// Load and define application data
+const pkg = require('./package.json');
 require('dotenv').config();
+const pathToApp = __dirname;
 
+// Initialize express
 let app = express();
 
-const pathToApp = __dirname;
-app.use(express.static(`${pathToApp}/public`));
+// Load external ExpressJS middleware
+const compression = require('compression');
+
 app.use(require('cookie-parser')());
-app.use(bodyParser.json({limit: '1mb'}));
+app.use(require('body-parser').json({limit: '1mb'}));
 app.use(require('express-session')({secret: 'the claws are gonna git ya', resave: false, saveUninitialized: false}));
 app.use(compression({filter: (req, res) => {
     if (req.headers['x-no-compression'] || req.headers['accept'] === 'text/event-stream') {
@@ -27,33 +28,56 @@ app.use(compression({filter: (req, res) => {
     return compression.filter(req, res)
 }}));
 
+// Middleware: Initialise logging.
+app.use(require('morgan')('combined', { stream: logger.stream }));
+
+// Middlware: Add headers to API.
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
-app.use(morgan('combined', { stream: logger.stream }))
 
+/** RENDERED ROUTES **/
 app.get('/', function(req, res) {
     if(process.env.NODE_ENV === 'production'){
         // When in production, redirect to the main site.
         res.redirect("https://apollotv.xyz/");
     }else {
+        // Otherwise, send index file.
         res.sendFile(`${pathToApp}/public/index.html`);
     }
 });
-
-app.post('/api/login', api.login);
-app.get('/api/authenticated', api.authenticated);
-app.get('/api/search/movies', api.verifyToken, api.searchMovies);
-
-app.get('/api/search/tv', api.verifyToken, api.searchTv);
+app.get('/bcrypt.js', (req, res) => res.sendFile(`${pathToApp}/public/bcrypt.js`));
+/** ./RENDERED ROUTES **/
 
 
-app.get('/api/search/tv', api.verifyToken, api.searchTv);
+/** API ROUTES **/
+const authRoutes = require('./src/api/authRoutes');
+app.use('/api/v1', authRoutes);
+
+const searchRoutes = require('./src/api/searchRoutes');
+app.use('/api/v1/search', searchRoutes);
+/** ./API ROUTES **/
 
 
-app.listen(3000, () => {
-    console.log('express server listening on: 3000');
+// Start listening...
+app.listen(process.env.PORT, () => {
+    // Always binds to localhost.
+    console.log(`${pkg.name} v${pkg.version} server listening on: http://127.0.0.1:${process.env.PORT}`);
 });
+
+// Test a resolver with the below code
+
+// const Vidoza = require('./src/scrapers/resolvers/Vidoza');
+// (async function() {
+//  const videoSourceUrl = await Vidoza('http://vidoza.net/embed-9srjo96k713x.html', require('request-promise').jar(), {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:63.0) Gecko/20100101 Firefox/63.0'});
+//  console.log(videoSourceUrl);
+// })()
+
+// const rp = require('request-promise');
+// (async function() {
+//     const [html1, html2] = await Promise.all([rp({uri: 'http://vidoza.net/embed-9srjo96k713x.html', timeout: 5000}), rp({uri: 'http://vidoza.net/embed-9srjo96k713x.html', timeout: 5000})]);
+//     console.log(html1, html2);
+// })()
