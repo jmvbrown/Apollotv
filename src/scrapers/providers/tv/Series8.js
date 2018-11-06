@@ -77,7 +77,7 @@ async function GoWatchSeries(req, sse) {
                     'x-real-ip': clientIp,
                     'x-forwarded-for': clientIp
                 };
-                resolve(sse, provider, 'SwatchSeries', jar, headers);
+                resolve(sse, provider, 'Series8', jar, headers);
             })
             
         } catch (err) {
