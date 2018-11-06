@@ -7,7 +7,7 @@ const randomUseragent = require('random-useragent');
 const tough = require('tough-cookie');
 const vm = require('vm');
 
-const logger = require('../../utils/logger')
+const logger = require('../../../utils/logger')
 
 const Openload = require('../../resolvers/Openload');
 
