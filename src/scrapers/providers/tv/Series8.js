@@ -11,7 +11,7 @@ const logger = require('../../../utils/logger')
 const { padTvNumber } = require('../../../utils');
 const resolve = require('../../resolvers/resolve');
 
-async function GoWatchSeries(req, sse) {
+async function Series8(req, sse) {
     const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')    
     const showTitle = req.query.title.toLowerCase();
     const { season, episode } = req.query;
@@ -94,4 +94,4 @@ async function GoWatchSeries(req, sse) {
 
 }
 
-module.exports = exports = GoWatchSeries;
+module.exports = exports = Series8;
