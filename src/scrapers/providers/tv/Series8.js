@@ -9,10 +9,7 @@ const vm = require('vm');
 
 const logger = require('../../../utils/logger')
 const { padTvNumber } = require('../../../utils');
-
 const resolve = require('../../resolvers/resolve');
-
-const Openload = require('../../resolvers/Openload');
 
 async function GoWatchSeries(req, sse) {
     const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')    
