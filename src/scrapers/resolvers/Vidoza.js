@@ -21,6 +21,10 @@ async function Vidoza(uri, jar, {'user-agent': userAgent}) {
         }
     }
 
+    return VidozaHtml(videoPageHtml);
+}
+
+function VidozaHtml(videoPageHtml) {
     if (videoPageHtml && videoPageHtml !== 'File was deleted') {
         $ = cheerio.load(videoPageHtml);
 
@@ -35,4 +39,4 @@ async function Vidoza(uri, jar, {'user-agent': userAgent}) {
 
 }
 
-module.exports = exports = Vidoza;
+module.exports = exports = {Vidoza, VidozaHtml};

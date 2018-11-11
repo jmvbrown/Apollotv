@@ -10,6 +10,10 @@ async function Streamango(uri, jar, headers) {
         timeout: 5000
     });
 
+    return StreamangoHtml(providerPageHtml);
+}
+
+function StreamangoHtml(providerPageHtml) {
     $ = cheerio.load(providerPageHtml);
 
     let fileId = '';
@@ -39,4 +43,4 @@ async function Streamango(uri, jar, headers) {
     return `https:${sandbox.srces[0].src}`;
 }
 
-module.exports = exports = Streamango;
+module.exports = exports = {Streamango, StreamangoHtml};

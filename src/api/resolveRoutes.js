@@ -21,9 +21,16 @@ const sendInitialStatus = (sse) => sse.send({ data: [`${new Date().getTime()}`],
  * ------
  * Allows you to search for movies.
  */
-resolveRoutes.post('/:resolver', verifyToken, (req, res) => {
+resolveRoutes.post('/:resolver', /* verifyToken, */ async (req, res) => {
+    // need to parse cookie possibly
     const jar = rp.jar();
-    resolveHtml(req.body.html, req.params.resolver, jar, req.bod.headers);
+    try {
+        const data = await resolveHtml(Buffer.from(req.body.html, 'base64').toString(), req.params.resolver, jar, req.body.headers)
+        res.json({data});
+    } catch(err) {
+        res.status(500).send();
+        console.error(err);
+    }
 });
 
 module.exports = resolveRoutes;

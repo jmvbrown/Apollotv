@@ -1,21 +1,21 @@
 const {Openload} = require('./Openload');
-const Streamango = require('./Streamango');
+const {Streamango} = require('./Streamango');
 const RapidVideo = require('./RapidVideo');
 const AZMovies = require('./AZMovies');
 const Vidlox = require('./Vidlox');
-const VShare = require('./VShare');
+const {VShare} = require('./VShare');
 const SpeedVid = require('./SpeedVid');
 const VidCloud = require('./VidCloud');
 const ClipWatching = require('./ClipWatching');
 const EStream = require('./EStream');
 const Vidzi = require('./Vidzi');
 const VidTodo = require('./VidTodo');
-const PowVideo = require('./PowVideo');
-const GamoVideo = require('./GamoVideo');
+const {PowVideo} = require('./PowVideo');
+const {GamoVideo} = require('./GamoVideo');
 const GorillaVid = require('./GorillaVid');
 const DaClips = require('./DaClips');
 const MovPod = require('./MovPod');
-const Vidoza = require('./Vidoza');
+const {Vidoza} = require('./Vidoza');
 
 const createEvent = require('../../utils/createEvent');
 
@@ -130,7 +130,7 @@ async function resolve(sse, uri, source, jar, headers) {
             }
             const dataObjects = await PowVideo(uri, jar, headers, videoId);
             dataObjects.forEach(dataObject => {
-                const event = createEvent(!!dataObject.file ? dataObject.file : dataObject.link, true, {target: uri}, '', 'PowVideo', source);
+                const event = createEvent(!!dataObject.file ? dataObject.file : dataObject.link, true, {target: uri, headers: {referer: `https://povwideo.cc/preview-${videoId}-954x562.html`}}, '', 'PowVideo', source);
                 sse.send(event, event.event);
             });
 

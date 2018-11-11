@@ -11,10 +11,10 @@ async function Openload(uri, jar, headers) {
         timeout: 5000
     });
 
-    return OpenloadHtml(providerPageHtml, jar, headers);
+    return OpenloadHtml(providerPageHtml);
 }
 
-function OpenloadHtml(providerPageHtml, jar, headers) {
+function OpenloadHtml(providerPageHtml) {
     if (!providerPageHtml.includes("We can't find the file you are looking for")) {
         let $ = cheerio.load(providerPageHtml);
 

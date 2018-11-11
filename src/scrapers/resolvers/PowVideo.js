@@ -19,6 +19,10 @@ async function PowVideo(uri, jar, headers, videoId) {
         timeout: 5000
     });
 
+    return PowVideoHtml(videoSourceHtml, jar, headers);
+}
+
+async function PowVideoHtml(videoSourceHtml, jar, headers) {
     const $ = cheerio.load(videoSourceHtml);
     let videoSources = [];
     const jwplayer = () => ({setup(){ return this;}, on(){ return this; }});
@@ -98,4 +102,4 @@ async function PowVideo(uri, jar, headers, videoId) {
     return sources;
 }
 
-module.exports = exports = PowVideo;
+module.exports = exports = {PowVideo, PowVideoHtml};
