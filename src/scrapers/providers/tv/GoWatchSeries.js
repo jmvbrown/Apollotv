@@ -7,9 +7,10 @@ const randomUseragent = require('random-useragent');
 const tough = require('tough-cookie');
 const vm = require('vm');
 
-const {Openload} = require('../../resolvers/Openload');
+const resolve = require('../../resolvers/resolve');
 
 async function GoWatchSeries(req, sse) {
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
     const showTitle = req.query.title.toLowerCase();
     const { season, episode } = req.query;
 
@@ -95,76 +96,20 @@ async function GoWatchSeries(req, sse) {
                 }
             })
 
-            iframeLinks.forEach(async (link) => {
-                if (link.includes('openload.co')) {
-                    const path = link.split('?');
-                    const videoSourceUrl = await Openload(path[0], jar, req.client.remoteAddress);
-                    sse.send({ videoSourceUrl, url, provider: 'https://openload.co', ipLocked: true }, 'results');
-                }
-                else if (link.includes('vidcloud.icu')) {
-                    // const path = link.split('?')[1].split('=')[1];
-                    // console.log('PATH: ', path)
-                    // const videoSourceObject = await rp({
-                    //     uri: `https://vidcloud.icu/streaming.php?id=${path}&page=video`,
-                    //     headers: {
-                    //         'user-agent': userAgent
-                    //     },
-                    //     jar,
-                    //     json: true,
-                    //     timeout: 5000
-                    // });
-
-                    // $ = cheerio.load(videoSourceObject.html);
-
-                    // const sandbox = { jwplayer() { return { setup() { }, on() { }, addButton() { } } }, $() { } };
-                    // vm.createContext(sandbox); // Contextify the sandbox.
-                    // vm.runInContext($('script').last()[0].children[0].data, sandbox);
-
-                    // const videoSourceUrl = sandbox.config.sources[0].file;
-
-                    // sse.send({ videoSourceUrl, url, provider: 'https://vidcloud.co' }, 'results');
-                    console.log('TODO: Fix VidCloud for GoWatchSeries');
-                }
-                else if (link.includes('rapidvideo')) {
-                    const videoPageHtml = await rp({
-                        uri: link,
-                        headers: {
-                            'user-agent': userAgent,
-                            'x-real-ip': req.client.remoteAddress,
-                            'x-forwarded-for': req.client.remoteAddress
-                        },
-                        jar,
-                        timeout: 5000
-                    });
-                    $ = cheerio.load(videoPageHtml);
-                    $('source').toArray().forEach((sourceElement) => {
-                        sse.send({ videoSourceUrl: $(sourceElement).attr('src'), quality: $(sourceElement).attr('title'), url, provider: 'https://rapidvideo.com' }, 'result');
-                    })
-                }
-                else if (link.includes('streamango')) {
-                    // const videoPageHtml = await rp({
-                    //     uri: link,
-                    //     headers: {
-                    //         'user-agent': userAgent,
-                    //         'x-real-ip': req.client.remoteAddress,
-                    //         'x-forwarded-for': req.client.remoteAddress
-                    //     },
-                    //     jar,
-                    //     timeout: 5000
-                    // });
-                    // $ = cheerio.load(videoPageHtml);
-                    // let setupObject = {};
-                    // const sandbox = { window: {}, setInterval() { }, jwplayer() { return { setup(value) { setupObject = value; }, on() { } } } };
-                    // vm.createContext(sandbox); // Contextify the sandbox.
-                    // vm.runInContext($('script:contains("p,a,c,k,e,d")')[0].children[0].data, sandbox);
-                    // setupObject.sources.forEach((source) => {
-                    //     sse.send({ videoSourceUrl: source.file, url, provider: 'https://streamango.com' }, 'result');
-                    // });
-                    console.log('TODO: Fix Streamandgo for GoWatchSeries');
-                }
+            iframeLinks.forEach(async (provider) => {
+                const headers = {
+                    'user-agent': userAgent,
+                    'x-real-ip': clientIp,
+                    'x-forwarded-for': clientIp
+                };
+                resolve(sse, provider, 'GoWatchSeries', jar, headers);
             });
         } catch (e) {
-            console.log(e)
+            console.error(err);
+            if (err.cause && err.cause.code !== 'ETIMEDOUT') {
+                console.error(err);
+                sse.send({ url, message: 'Looks like this provider is down.' }, 'error');
+            }
         }
 
     }
