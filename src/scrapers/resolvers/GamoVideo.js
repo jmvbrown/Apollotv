@@ -17,6 +17,10 @@ async function GamoVideo(uri, jar, {'user-agent': userAgent}) {
         timeout: 5000
     });
 
+    return GamoVideoHtml(videoPageHtml);
+}
+
+function GamoVideoHtml(videoPageHtml) {
     $ = cheerio.load(videoPageHtml);
 
     let setupObject = {};
@@ -30,4 +34,4 @@ async function GamoVideo(uri, jar, {'user-agent': userAgent}) {
     return sources.filter(source => !source.startsWith('rtmp'));
 }
 
-module.exports = exports = GamoVideo;
+module.exports = exports = {GamoVideo, GamoVideoHtml};

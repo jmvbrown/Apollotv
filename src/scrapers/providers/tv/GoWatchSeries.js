@@ -10,7 +10,7 @@ const vm = require('vm');
 const resolve = require('../../resolvers/resolve');
 
 async function GoWatchSeries(req, sse) {
-    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')        
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
     const showTitle = req.query.title.toLowerCase();
     const { season, episode } = req.query;
 

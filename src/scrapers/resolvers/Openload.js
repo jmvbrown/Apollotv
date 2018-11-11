@@ -11,10 +11,14 @@ async function Openload(uri, jar, headers) {
         timeout: 5000
     });
 
-    if (!providerPageHtml.includes("We can't find the file you are looking for")) {
-        $ = cheerio.load(providerPageHtml);
+    return OpenloadHtml(providerPageHtml);
+}
 
-        let wholeFileId = ''
+function OpenloadHtml(providerPageHtml) {
+    if (!providerPageHtml.includes("We can't find the file you are looking for")) {
+        let $ = cheerio.load(providerPageHtml);
+
+        let wholeFileId = '';
         const jQuery = function(selector, anotherArg) {
             return {
                 $(selector) {
@@ -66,4 +70,4 @@ async function Openload(uri, jar, headers) {
     throw 'Openload: File not found';
 }
 
-module.exports = exports = Openload;
+module.exports = exports = {Openload, OpenloadHtml};

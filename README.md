@@ -138,6 +138,9 @@ hour is up, the client will request another token.
     // The provider URL that Claws needs the HTML from
     "target": "",
 
+    // The headers required to receive a valid response from the provider
+    "headers": {},
+
     // The resolver to send the HTML to
     "resolver": "",
 }

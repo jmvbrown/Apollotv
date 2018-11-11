@@ -12,6 +12,11 @@ async function VShare(uri, jar, {'user-agent': userAgent}) {
         timeout: 5000
     });
 
+    return VShareHtml(videoSourceHtml);
+}
+
+function VShareHtml(videoSourceHtml) {
+
     const $ = cheerio.load(videoSourceHtml);
 
     const source = $('source').attr('src');
@@ -23,4 +28,4 @@ async function VShare(uri, jar, {'user-agent': userAgent}) {
     return source;
 }
 
-module.exports = exports = VShare;
+module.exports = exports = {VShare, VShareHtml};
