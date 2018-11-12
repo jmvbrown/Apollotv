@@ -26,7 +26,7 @@ resolveRoutes.post('/:resolver', verifyToken, async (req, res) => {
     const jar = rp.jar();
     try {
         const data = await resolveHtml(Buffer.from(req.body.html, 'base64').toString(), req.params.resolver, jar, req.body.headers)
-        res.json({data});
+        res.json(data);
     } catch(err) {
         res.status(500).send();
         console.error(err);

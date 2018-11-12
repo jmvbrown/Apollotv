@@ -21,8 +21,42 @@ const resolvers = {
 
 const createEvent = require('../../utils/createEvent');
 
-function resolve(html, resolver, jar, headers) {
-    return resolvers[resolver](html, jar, headers);
+async function resolve(html, resolver, jar, headers) {
+    const data = await resolvers[resolver](html, jar, headers);
+
+    if (resolver === 'Openload') {
+        return createEvent(data, false, {}, '', 'Openload')
+
+    } else if (resolver === 'Streamango') {
+        return createEvent(data, false, {}, '', 'Streamango')
+
+    } else if (resolver === 'VShare') {
+        return createEvent(data, false, {}, '', 'VShare');
+
+    } else if (resolver === 'PowVideo') {
+        const dataList = [];
+        data.forEach(dataObject => {
+            dataList.push(createEvent(!!dataObject.file ? dataObject.file : dataObject.link, false, {}, '', 'PowVideo'));
+        });
+        return dataList;
+
+    } else if (resolver === 'GamoVideo') {
+        const dataList = [];
+        data.forEach(dataObject => {
+            dataList.push(createEvent(dataObject, false, {}, '', 'GamoVideo'));
+        });
+        return dataList;
+
+    } else if (resolver === 'Vidoza') {
+        const dataList = [];
+        data.forEach(dataObject => {
+            dataList.push(createEvent(dataObject.src, false, {}, dataObject.res, 'Vidoza'));
+        });
+        return dataList;
+
+    } else {
+        throw `Resolver ${resolver} not supported`;
+    }
 }
 
 module.exports = exports = resolve;
