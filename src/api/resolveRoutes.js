@@ -25,8 +25,8 @@ resolveRoutes.post('/:resolver', verifyToken, async (req, res) => {
     // need to parse cookie possibly
     const jar = rp.jar();
     try {
-        console.log(req.body);
-        const data = await resolveHtml(Buffer.from(req.body, 'base64').toString(), req.params.resolver, jar, req.body.headers)
+        console.log(JSON.stringify(req.body));
+        const data = await resolveHtml(Buffer.from(req.body.html, 'base64').toString(), req.params.resolver, jar, req.body.headers)
         res.json({data});
     } catch(err) {
         res.status(500).send();
