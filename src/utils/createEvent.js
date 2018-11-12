@@ -4,9 +4,9 @@ function createEvent(data, ipLocked, pairing, quality, provider, source, headers
 	if (ipLocked && process.env.NODE_ENV === 'production') {
 		return {
 		    event: 'scrape',
-		    target: `/api/v1/resolve/${pairing.target}`,
+		    target: pairing.target,
 		    headers,
-		    resolver: provider
+		    resolver: `/api/v1/resolve/${provider}`
 		}
 	}
 
