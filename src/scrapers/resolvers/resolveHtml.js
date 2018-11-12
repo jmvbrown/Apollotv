@@ -25,13 +25,13 @@ async function resolve(html, resolver, jar, headers) {
     const data = await resolvers[resolver](html, jar, headers);
 
     if (resolver === 'Openload') {
-        return createEvent(data, false, {}, '', 'Openload')
+        return [createEvent(data, false, {}, '', 'Openload')];
 
     } else if (resolver === 'Streamango') {
-        return createEvent(data, false, {}, '', 'Streamango')
+        return [createEvent(data, false, {}, '', 'Streamango')];
 
     } else if (resolver === 'VShare') {
-        return createEvent(data, false, {}, '', 'VShare');
+        return [createEvent(data, false, {}, '', 'VShare')];
 
     } else if (resolver === 'PowVideo') {
         const dataList = [];
