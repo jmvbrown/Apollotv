@@ -16,7 +16,7 @@ let app = express();
 const compression = require('compression');
 
 app.use(require('cookie-parser')());
-app.use(require('body-parser').json({limit: '1mb'}));
+app.use(require('body-parser').json({limit: '10mb'}));
 app.use(require('express-session')({secret: 'the claws are gonna git ya', resave: false, saveUninitialized: false}));
 app.use(compression({filter: (req, res) => {
     if (req.headers['x-no-compression'] || req.headers['accept'] === 'text/event-stream') {

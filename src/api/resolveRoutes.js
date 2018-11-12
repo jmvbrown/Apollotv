@@ -21,7 +21,7 @@ const sendInitialStatus = (sse) => sse.send({ data: [`${new Date().getTime()}`],
  * ------
  * Allows you to search for movies.
  */
-resolveRoutes.post('/:resolver', verifyToken, async (req, res) => {
+resolveRoutes.post('/:resolver', async (req, res) => {
     // need to parse cookie possibly
     const jar = rp.jar();
     try {
