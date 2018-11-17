@@ -227,7 +227,9 @@
                 });
                 const responseJSON = await response.json();
                 token = responseJSON.token;
-                localStorage.setItem('token', token);
+                if (responseJSON.auth) {
+                    localStorage.setItem('token', token);
+                }
 
                 return token;
             }

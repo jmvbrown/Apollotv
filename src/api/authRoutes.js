@@ -3,12 +3,29 @@
 // Import dependencies
 const bcrypt = require('../../public/bcrypt');
 const jwt = require('jsonwebtoken');
+const {RateLimiterMemory} = require('rate-limiter-flexible');
 
 // Define constants
 const authDelay = 5;
 
 // Declare new router and start defining routes:
 const authRoutes = require('express').Router();
+
+// Rate limit 3 requests per hour
+const opts = {
+    points: 3, // 3 requests
+    duration: 3600, // per hour
+};
+const rateLimiter = new RateLimiterMemory(opts);
+
+async function rateLimit(req, res, next) {
+    try {
+        await rateLimiter.consume(req.connection.remoteAddress);
+        next();
+    } catch (RateLimiterRes) {
+        res.status(429).json({auth: false, message: 'Too Many Requests'});
+    }
+}
 
 /**
  * /api/v1/login
@@ -19,7 +36,7 @@ const authRoutes = require('express').Router();
  * (It will check up to five seconds back )
  * If validated, it will generate a token that can be used by the client for one hour.
  */
-authRoutes.post('/login', async (req, res) => {
+authRoutes.post('/login', rateLimit, async (req, res) => {
     let clientIsValid = false;
     let now;
 
