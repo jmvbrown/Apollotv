@@ -2,6 +2,8 @@
 
 // Import dependencies
 const express = require('express');
+const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const logger = require('./src/utils/logger');
 
 // Load and define application data
@@ -17,7 +19,14 @@ const compression = require('compression');
 
 app.use(require('cookie-parser')());
 app.use(require('body-parser').json({limit: '10mb'}));
-app.use(require('express-session')({secret: 'the claws are gonna git ya', resave: false, saveUninitialized: false}));
+app.use(session({
+    store: new MemoryStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    secret: 'the claws are gonna git ya',
+    resave: false,
+    saveUninitialized: false
+}));
 app.use(compression({filter: (req, res) => {
     if (req.headers['x-no-compression'] || req.headers['accept'] === 'text/event-stream') {
         // don't compress responses with this request header
@@ -29,7 +38,7 @@ app.use(compression({filter: (req, res) => {
 }}));
 
 // Middleware: Initialise logging.
-app.use(require('morgan')('combined', { stream: logger.stream }));
+app.use(require('morgan')('combined', {stream: logger.stream}));
 
 // Middlware: Add headers to API.
 app.use(function (req, res, next) {
@@ -63,7 +72,6 @@ app.use('/api/v1/search', searchRoutes);
 const resolveRoutes = require('./src/api/resolveRoutes');
 app.use('/api/v1/resolve', resolveRoutes);
 /** ./API ROUTES **/
-
 
 // Start listening...
 app.listen(process.env.PORT, () => {
