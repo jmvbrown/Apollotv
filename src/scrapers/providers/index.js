@@ -3,8 +3,9 @@
 const providers =
 	{
 		movies: [
-			require('./movies/Afdah'),
-			require('./movies/AZMovies'),
+			// require('./movies/Afdah'),
+			// require('./movies/AZMovies'),
+			require('./movies/GoStream'),
 		],
 		tv: [
 			require('./tv/GoWatchSeries'),
