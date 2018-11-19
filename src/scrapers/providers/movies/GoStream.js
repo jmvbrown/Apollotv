@@ -1,3 +1,6 @@
+// Suspending development on this because https://consistent.stream uses a captcha after a few requests.
+// Possible solution: maybe try making an account with them
+
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const tough = require('tough-cookie');
