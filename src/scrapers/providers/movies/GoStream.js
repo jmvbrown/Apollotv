@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
 
+const {timeout} = require('../../../utils');
 const resolve = require('../../resolvers/resolve');
 
 async function GoStream(req, sse) {
@@ -45,7 +46,35 @@ async function GoStream(req, sse) {
 
             $ = cheerio.load(moviePageHtml);
 
-            const apiUrl = $('.movieplay iframe').attr('src');
+            const apiUrl = $('iframe[src*="consistent.stream"]').attr('src');
+
+            // let videoId = '';
+            // let attempt = 0;
+            // while(attempt < 5 && !videoId) {
+            //     try {
+            //         console.log(attempt, apiUrl);
+            //         const apiPageHtml = await rp({
+            //             uri: apiUrl,
+            //             headers: {
+            //                 Referer: moviePageUrl,
+            //                 'user-agent': userAgent,
+            //                 'cache-control': 'no-cache'
+            //             },
+            //             jar,
+            //             timeout: 5000
+            //         });
+            //         $ = cheerio.load(apiPageHtml);
+            //         videoId = $('player').attr('video');
+            //         if (!videoId) {
+            //             throw 'Captcha or throttle';
+            //         }
+            //         console.log('success', apiUrl);
+            //     } catch (err) {
+            //         console.log('fail', apiUrl);
+            //         await timeout(3000);
+            //         attempt++;
+            //     }
+            // }
 
             const apiPageHtml = await rp({
                 uri: apiUrl,
@@ -57,10 +86,9 @@ async function GoStream(req, sse) {
                 jar,
                 timeout: 5000
             });
-
             $ = cheerio.load(apiPageHtml);
-
             const videoId = $('player').attr('video');
+
             const videoKey = $('player').attr('hash');
             const videoExpireTime = $('player').attr('expire');
             const response = await rp({
