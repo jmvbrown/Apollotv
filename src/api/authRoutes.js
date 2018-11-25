@@ -36,7 +36,7 @@ async function rateLimit(req, res, next) {
  * (It will check up to five seconds back )
  * If validated, it will generate a token that can be used by the client for one hour.
  */
-authRoutes.post('/login', rateLimit, async (req, res) => {
+authRoutes.post('/login', /*rateLimit,*/ async (req, res) => {
     let clientIsValid = false;
     let now;
 
