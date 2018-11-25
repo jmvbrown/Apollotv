@@ -12,7 +12,7 @@ const authDelay = 5;
 const authRoutes = require('express').Router();
 
 // Rate limit 3 requests per hour
-const opts = {
+/*const opts = {
     points: 3, // 3 requests
     duration: 3600, // per hour
 };
@@ -25,7 +25,7 @@ async function rateLimit(req, res, next) {
     } catch (RateLimiterRes) {
         res.status(429).json({auth: false, message: 'Too Many Requests'});
     }
-}
+}*/
 
 /**
  * /api/v1/login
