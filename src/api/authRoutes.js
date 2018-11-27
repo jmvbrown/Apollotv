@@ -12,7 +12,7 @@ const authDelay = 5;
 const authRoutes = require('express').Router();
 
 // Rate limit 3 requests per hour
-/*const opts = {
+const opts = {
     points: 3, // 3 requests
     duration: 3600, // per hour
 };
@@ -20,12 +20,12 @@ const rateLimiter = new RateLimiterMemory(opts);
 
 async function rateLimit(req, res, next) {
     try {
-        await rateLimiter.consume(req.connection.remoteAddress);
+        await rateLimiter.consume(req.client.remoteAddress);
         next();
     } catch (RateLimiterRes) {
         res.status(429).json({auth: false, message: 'Too Many Requests'});
     }
-}*/
+}
 
 /**
  * /api/v1/login
@@ -36,7 +36,7 @@ async function rateLimit(req, res, next) {
  * (It will check up to five seconds back )
  * If validated, it will generate a token that can be used by the client for one hour.
  */
-authRoutes.post('/login', /*rateLimit,*/ async (req, res) => {
+authRoutes.post('/login', rateLimit, async (req, res) => {
     let clientIsValid = false;
     let now;
 
@@ -53,7 +53,7 @@ authRoutes.post('/login', /*rateLimit,*/ async (req, res) => {
     }
 
     if (!clientIsValid) {
-        return res.status(401).json({ auth: false, token: null });
+        return res.status(401).json({auth: false, token: null});
     }
 
     // create a token
@@ -63,32 +63,6 @@ authRoutes.post('/login', /*rateLimit,*/ async (req, res) => {
 
     // return the information including token as JSON
     res.json({auth: true, token});
-});
-
-/**
- * /api/v1/authenticated
- * ------
- * Allows a client to check if its token is valid.
- * ------
- * Returns a JSON object, with two parameters, 'auth' (bool) and 'message' (string).
- * If the client's token is valid, 'auth' will return true.
- * 'message' is just a human-readable message explaining the status.
- */
-authRoutes.all('/authenticated', (req, res) => {
-    if (req.method !== "GET" && req.method !== "POST") return res.json({ auth: false, message: "Invalid HTTP method." });
-
-    // check header or url parameters or post parameters for token
-    const token = req.headers['x-access-token'] || req.body.token || req.query.token;
-    if (!token) return res.json({auth: false, message: 'You did not provide a token.'});
-
-    // verifies secret and checks exp
-    jwt.verify(token, process.env.SECRET_SERVER_ID, (err, decoded) => {
-        if (err) return res.json({auth: false, message: 'Your token does not appear to be valid.'});
-
-        // TODO: [ if everything is good, save to request for use in other routes ] ?
-        // Did this get implemented? ~ SH
-        res.json({auth: true, message: 'Your token is valid.'});
-    });
 });
 
 module.exports = authRoutes;

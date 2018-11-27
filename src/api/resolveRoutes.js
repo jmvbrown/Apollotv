@@ -29,7 +29,7 @@ resolveRoutes.post('/:resolver', async (req, res) => {
         res.json(data);
     } catch(err) {
         res.status(500).send();
-        console.error(err);
+        console.error(err.message);
     }
 });
 

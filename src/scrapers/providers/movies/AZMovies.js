@@ -1,4 +1,5 @@
-const rp = require('request-promise');
+const Promise = require('bluebird');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
@@ -13,8 +14,18 @@ async function AZMovies(req, sse) {
     const urls = ["https://azmovies.xyz"];
     const promises = [];
 
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
+
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
+        const resolvePromises = [];
+
         try {
             const jar = rp.jar();
             const movieUrl = `${url}/watch.php?title=${movieTitle.replace(/ /g, '+')}`;
@@ -57,17 +68,24 @@ async function AZMovies(req, sse) {
 
             $('#serverul li a').toArray().forEach(async (element) => {
                 const providerUrl = $(element).attr('href');
-                resolve(sse, providerUrl, 'AZMovies', jar, headers);
+                resolvePromises.push(resolve(sse, providerUrl, 'AZMovies', jar, headers));
             });
+
         } catch (err) {
-            console.log(err);
+            if (!sse.stopExecution) {
+                console.error({source: 'AZMovies', sourceUrl: url, query: {title: req.query.title}, error: err.message || err.toString()});
+            }
         }
+
+        return Promise.all(resolvePromises);
     }
 
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
     });
+
+    return Promise.all(promises);
 }
 
 module.exports = exports = AZMovies;

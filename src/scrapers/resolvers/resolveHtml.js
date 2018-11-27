@@ -21,7 +21,7 @@ const resolvers = {
 
 const createEvent = require('../../utils/createEvent');
 
-async function resolve(html, resolver, jar, headers) {
+async function resolveHtml(html, resolver, jar, headers) {
     const data = await resolvers[resolver](html, jar, headers);
 
     if (resolver === 'Openload') {
@@ -59,4 +59,4 @@ async function resolve(html, resolver, jar, headers) {
     }
 }
 
-module.exports = exports = resolve;
+module.exports = exports = resolveHtml;

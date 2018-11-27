@@ -1,5 +1,5 @@
 const Promise = require('bluebird');
-const rp = require('request-promise');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 const vm = require('vm');
@@ -16,10 +16,19 @@ async function SeriesFree(req, sse) {
 
     const urls = ["https://seriesfree.to"];
     const promises = [];
-    let browser;
+
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
 
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
+        const resolvePromises = [];
+
         try {
             const jar = rp.jar();
             const userAgent = randomUseragent.getRandom();
@@ -96,21 +105,23 @@ async function SeriesFree(req, sse) {
                     'x-real-ip': clientIp,
                     'x-forwarded-for': clientIp
                 };
-                resolve(sse, providerUrl, 'SeriesFree', jar, headers);
+                resolvePromises.push(resolve(sse, providerUrl, 'SeriesFree', jar, headers));
             })
         } catch (err) {
-            console.error(err);
-            if (err.cause && err.cause.code !== 'ETIMEDOUT') {
-                console.error(err);
-                sse.send({ url, message: 'Looks like this provider is down.' }, 'error');
+            if (!sse.stopExecution) {
+                console.error({source: 'SeriesFree', sourceUrl: url, query: {title: req.query.title, season: req.query.season, episode: req.query.episode}, error: err.message || err.toString()});
             }
         }
+
+        return Promise.all(resolvePromises);
     }
 
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
     });
+
+    return Promise.all(promises);
 }
 
 module.exports = exports = SeriesFree;
