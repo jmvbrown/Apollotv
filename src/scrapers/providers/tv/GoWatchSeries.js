@@ -1,6 +1,6 @@
-const URL = require('url');
 const Promise = require('bluebird');
-const rp = require('request-promise');
+const URL = require('url');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const randomUseragent = require('random-useragent');
@@ -17,8 +17,17 @@ async function GoWatchSeries(req, sse) {
     const urls = ['https://gowatchseries.co'];
     const promises = [];
 
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
 
     async function scrape(url) {
+        const resolvePromises = [];
+
         try {
             var jar = rp.jar();
             const userAgent = randomUseragent.getRandom();
@@ -102,23 +111,21 @@ async function GoWatchSeries(req, sse) {
                     'x-real-ip': clientIp,
                     'x-forwarded-for': clientIp
                 };
-                resolve(sse, provider, 'GoWatchSeries', jar, headers);
+                resolvePromises.push(resolve(sse, provider, 'GoWatchSeries', jar, headers));
             });
-        } catch (e) {
-            console.error(err);
-            if (err.cause && err.cause.code !== 'ETIMEDOUT') {
-                console.error(err);
-                sse.send({ url, message: 'Looks like this provider is down.' }, 'error');
+        } catch (err) {
+            if (!sse.stopExecution) {
+                console.error({source: 'GoWatchSeries', sourceUrl: url, query: {title: req.query.title, season: req.query.season, episode: req.query.episode}, error: err.message || err.toString()});
             }
         }
 
+        return Promise.all(resolvePromises);
     }
     urls.forEach((url) => {
         promises.push(scrape(url));
-    })
+    });
 
-    await Promise.all(promises);
-
+    return Promise.all(promises);
 }
 
 module.exports = exports = GoWatchSeries;

@@ -1,7 +1,7 @@
 // Suspending development on this because https://consistent.stream uses a captcha after a few requests.
 // Possible solution: maybe try making an account with them
 
-const rp = require('request-promise');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const tough = require('tough-cookie');
 const randomUseragent = require('random-useragent');
@@ -16,6 +16,14 @@ async function GoStream(req, sse) {
     // These are all the same host I think. https://xmovies8.org isn't loading.
     const urls = ["https://gostream.site"];
     const promises = [];
+
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
 
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {

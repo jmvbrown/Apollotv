@@ -193,16 +193,7 @@
                 if (token) {
                     const decodedToken = jwtDecode(token);
                     const {exp} = decodedToken;
-                    if ((new Date()).valueOf() >= exp * 1000) {
-                        const response = await fetch(`/api/v1/authenticated?token=${token}`, {
-                            method: 'GET',
-                            credentials: 'include'
-                        });
-                        const responseJSON = await response.json();
-                        if (responseJSON.auth) {
-                            return token;
-                        }
-                    } else {
+                    if ((new Date()).valueOf() < exp * 1000) {
                         return token;
                     }
                 }
@@ -246,6 +237,11 @@
                 es.addEventListener('error', function (e) {
                     console.error(e.data);
                 });
+                es.addEventListener('done', function (e) {
+                    console.log(e.data);
+                    console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
+                    es.close();
+                });
             }
             async function searchTV() {
                 let token = await authenticate();
@@ -262,6 +258,11 @@
                 });
                 es.addEventListener('error', function (e) {
                     console.error(e.data);
+                });
+                es.addEventListener('done', function (e) {
+                    console.log(e.data);
+                    console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
+                    es.close();
                 });
             }
             function stop() {

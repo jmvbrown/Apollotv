@@ -20,7 +20,13 @@ const {Vidoza} = require('./Vidoza');
 const createEvent = require('../../utils/createEvent');
 
 async function resolve(sse, uri, source, jar, headers) {
+    if (sse.stopExecution) {
+        console.log('Skip resolve due to disconnect');
+        return;
+    }
+
     console.log(uri);
+
     try {
         if (uri.includes('openload.co') || uri.includes('oload.cloud')) {
             const path = uri.split('/');
@@ -42,7 +48,7 @@ async function resolve(sse, uri, source, jar, headers) {
             const event = createEvent(data, false, {}, '', 'RapidVideo', source);
             sse.send(event, event.event);
 
-        } else if (uri.includes('azmovies.co')) {
+        } else if (uri.includes('azmovies.co') || uri.includes('azmovies.ws')) {
             const file = await AZMovies(uri, jar, headers);
             const event = createEvent(file, false, {}, '', 'AZMovies', source);
             sse.send(event, event.event);
@@ -100,12 +106,12 @@ async function resolve(sse, uri, source, jar, headers) {
             // const path = uri.split('/');
             // const videoId = path[path.length - 1];
             // const videoSourceUrls = await EStream(`http://estream.xyz/embed-${videoId}`, jar, clientIp, userAgent);
-            // videoSourceUrls.forEach(source => sse.send({videoSourceUrl: source, url, provider: 'http://estream.xyz'}, 'results'));
+            // videoSourceUrls.forEach(source => sse.send({videoSourceUrl: source, url, provider: 'http://estream.xyz'}, 'result'));
             // // All the links are broken...
 
         } else if (uri.includes('vidzi.online')) {
             // const sources = await Vidzi(uri, jar, clientIp, userAgent);
-            // sources.forEach((source) => sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'results'));
+            // sources.forEach((source) => sse.send({videoSourceUrl: source.file, url, provider: 'https://vidzi.online'}, 'result'));
             // // All the links are broken...
 
         } else if (uri.includes('vidto.me')) {
@@ -181,7 +187,7 @@ async function resolve(sse, uri, source, jar, headers) {
             console.log('Still need a resolver for', uri);
         }
     } catch(err) {
-        console.error(err);
+        console.error({source, providerUrl: uri, error: err.message || err.toString()});
     }
 }
 

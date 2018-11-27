@@ -3,6 +3,7 @@
 // Import dependencies
 const SSE = require('express-sse');
 const {verifyToken} = require('../utils');
+const emitter = require('../utils/eventEmitter');
 
 // Load providers
 const providers = require('../scrapers/providers');
@@ -20,13 +21,27 @@ const sendInitialStatus = (sse) => sse.send({ data: [`${new Date().getTime()}`],
  * ------
  * Allows you to search for movies.
  */
-searchRoutes.get('/movies', verifyToken, (req, res) => {
+searchRoutes.get('/movies', verifyToken, async (req, res) => {
     const sse = new SSE();
     sse.init(req, res);
     sendInitialStatus(sse);
 
+    const promises = [];
+
     // Get movie providers.
-    [...providers.movies, ...providers.universal].forEach(provider => provider(req, sse));
+    [...providers.movies, ...providers.universal].forEach(provider => promises.push(provider(req, sse)));
+
+    req.on('close', function() {
+        console.log('disconnected');
+        emitter.emit('disconnected');
+    });
+
+    emitter.on('disconnected', () => {
+        sse.stopExecution = true;
+    });
+
+    await Promise.all(promises);
+    sse.send({event: 'done'}, 'done');
 });
 
 /**
@@ -34,13 +49,27 @@ searchRoutes.get('/movies', verifyToken, (req, res) => {
  * ------
  * Allows you to search for TV shows.
  */
-searchRoutes.get('/tv', verifyToken, (req, res) => {
+searchRoutes.get('/tv', verifyToken, async (req, res) => {
     const sse = new SSE();
     sse.init(req, res);
     sendInitialStatus(sse);
 
+    const promises = [];
+
     // Get TV providers.
-    [...providers.tv, ...providers.universal].forEach(provider => provider(req, sse));
+    [...providers.tv, ...providers.universal].forEach(provider => promises.push(provider(req, sse)));
+
+    req.on('close', function() {
+        console.log('disconnected');
+        emitter.emit('disconnected');
+    });
+
+    emitter.on('disconnected', () => {
+        sse.stopExecution = true;
+    });
+
+    await Promise.all(promises);
+    sse.send({event: 'done'}, 'done');
 });
 
 module.exports = searchRoutes;

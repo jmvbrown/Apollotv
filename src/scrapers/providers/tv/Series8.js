@@ -1,6 +1,6 @@
-const URL = require('url');
 const Promise = require('bluebird');
-const rp = require('request-promise');
+const URL = require('url');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const randomUseragent = require('random-useragent');
@@ -12,15 +12,24 @@ const { padTvNumber } = require('../../../utils');
 const resolve = require('../../resolvers/resolve');
 
 async function Series8(req, sse) {
-    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '')    
+    const clientIp = req.client.remoteAddress.replace('::ffff:', '').replace('::1', '');
     const showTitle = req.query.title.toLowerCase();
-    const { season, episode } = req.query;
+    const {season, episode} = req.query;
 
     const urls = ['https://www2.seriesonline8.co'];
     const promises = [];
 
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
 
     async function scrape(url) {
+        const resolvePromises = [];
+
         try {
             var jar = rp.jar();
             const userAgent = randomUseragent.getRandom();
@@ -38,16 +47,16 @@ async function Series8(req, sse) {
             let $ = cheerio.load(html);
 
             const seasonLink = $('.ml-mask').toArray().find((moviePoster) => {
-                if (moviePoster.type === 'tag' &&  moviePoster.name === 'a'){
+                if (moviePoster.type === 'tag' &&  moviePoster.name === 'a') {
                     const link = $(moviePoster).attr('href');
                     const title = showTitle.replace(/ /g, '-');
                     return link.includes(`${title}-season-${season}`);
                 }
             });
-            const seasonPageLink = `${url}${$(seasonLink).attr('href')}`
+            const seasonPageLink = `${url}${$(seasonLink).attr('href')}`;
 
-            const episodeLink = `${seasonPageLink}/watching.html?ep=${episode}`
-            
+            const episodeLink = `${seasonPageLink}/watching.html?ep=${episode}`;
+
             const episodePageHtml = await rp({
                 uri: episodeLink,
                 headers: {
@@ -63,10 +72,10 @@ async function Series8(req, sse) {
 
             const videoUrls = $('.btn-eps').toArray().reduce((providerUrls, iframeLinks) => {
                 if ($(iframeLinks).attr('title').toLowerCase().includes(`season ${season}`) && $(iframeLinks).attr('title').toLowerCase().includes(`episode ${padTvNumber(episode)}`)) {
-                    providerUrls.push($(iframeLinks).attr('player-data'))
+                    providerUrls.push($(iframeLinks).attr('player-data'));
                 }
                 return providerUrls;
-            }, [])
+            }, []);
 
             videoUrls.forEach(async (provider) => {
                 const headers = {
@@ -74,23 +83,22 @@ async function Series8(req, sse) {
                     'x-real-ip': clientIp,
                     'x-forwarded-for': clientIp
                 };
-                resolve(sse, provider, 'Series8', jar, headers);
-            })
-            
+                resolvePromises.push(resolve(sse, provider, 'Series8', jar, headers));
+            });
         } catch (err) {
-            console.error(err);
-            if (err.cause && err.cause.code !== 'ETIMEDOUT') {
-                console.error(err);
-                sse.send({ url, message: 'Looks like this provider is down.' }, 'error');
+            if (!sse.stopExecution) {
+                console.error({source: 'Series8', sourceUrl: url, query: {title: req.query.title, season: req.query.season, episode: req.query.episode}, error: err.message || err.toString()});
             }
         }
 
+        return Promise.all(resolvePromises);
     }
+
     urls.forEach((url) => {
         promises.push(scrape(url));
     })
 
-    await Promise.all(promises);
+    return Promise.all(promises);
 
 }
 

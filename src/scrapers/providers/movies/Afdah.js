@@ -1,4 +1,5 @@
-const rp = require('request-promise');
+const Promise = require('bluebird');
+const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 
@@ -8,11 +9,21 @@ async function Afdah(req, sse) {
     const movieTitle = req.query.title;
 
     // These are all the same host I think. https://xmovies8.org isn't loading.
-    const urls = ["https://afdah.org", "https://genvideos.com", "https://genvideos.co", "https://watch32hd.co", "https://putlockerhd.co", "https://xmovies8.org"];
+    const urls = ["https://afdah.org", "https://genvideos.com", "https://genvideos.co", "https://watch32hd.co", "https://putlockerhd.co"/* , "https://xmovies8.org" */];
     const promises = [];
+
+    const rp = RequestPromise.defaults(target => {
+        if (sse.stopExecution) {
+            return null;
+        }
+
+        return RequestPromise(target);
+    });
 
     // Go to each url and scrape for links, then send the link to the client
     async function scrape(url) {
+        const resolvePromises = [];
+
         try {
             let html = '';
 
@@ -157,18 +168,24 @@ async function Afdah(req, sse) {
                     };
                     const providerUrl = `https://oload.cloud/embed/${openloadData.id}`;
 
-                    resolve(sse, providerUrl, 'Afdah', jar, headers);
+                    resolvePromises.push(resolve(sse, providerUrl, 'Afdah', jar, headers));
                 }
             }
         } catch (err) {
-            console.error(err);
+            if (!sse.stopExecution) {
+                console.error({source: 'Afdah', sourceUrl: url, query: {title: req.query.title}, error: err.message || err.toString()});
+            }
         }
+
+        return Promise.all(resolvePromises);
     }
 
     // Asyncronously start all the scrapers for each url
     urls.forEach((url) => {
         promises.push(scrape(url));
     });
+
+    return Promise.all(promises);
 }
 
 module.exports = exports = Afdah;
