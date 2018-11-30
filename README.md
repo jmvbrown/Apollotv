@@ -4,7 +4,7 @@ The server-side scraper software for ApolloTV.
 ## Getting Started
 
 ### Installation
-Install node^10.10.0 and npm^6.4.1.
+Install node^10.14.0 and npm^6.4.1.
 - Clone the repository and navigate to the directory.
 - Run `npm install`.
 - Copy the contents of `.env.dist` to a file called `.env`.
