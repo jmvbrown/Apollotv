@@ -2,7 +2,6 @@ const Promise = require('bluebird');
 const URL = require('url');
 const RequestPromise = require('request-promise');
 const cheerio = require('cheerio');
-const puppeteer = require('puppeteer');
 const randomUseragent = require('random-useragent');
 const tough = require('tough-cookie');
 const vm = require('vm');

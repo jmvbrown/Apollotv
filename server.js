@@ -2,8 +2,6 @@
 
 // Import dependencies
 const express = require('express');
-const session = require('express-session');
-const MemoryStore = require('memorystore')(session)
 const logger = require('./src/utils/logger');
 
 // Load and define application data
@@ -17,16 +15,7 @@ let app = express();
 // Load external ExpressJS middleware
 const compression = require('compression');
 
-app.use(require('cookie-parser')());
 app.use(require('body-parser').json({limit: '10mb'}));
-app.use(session({
-    store: new MemoryStore({
-        checkPeriod: 86400000 // prune expired entries every 24h
-    }),
-    secret: 'the claws are gonna git ya',
-    resave: false,
-    saveUninitialized: false
-}));
 app.use(compression({filter: (req, res) => {
     if (req.headers['x-no-compression'] || req.headers['accept'] === 'text/event-stream') {
         // don't compress responses with this request header

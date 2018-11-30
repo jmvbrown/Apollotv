@@ -57,6 +57,7 @@ hour is up, the client will request another token.
 - Set the `SECRET_CLIENT_ID` inside `public/index.html` to match the same value inside `.env`
 - Run `npm run dev`
 - Open your browser to `http://127.0.0.1:3000`
+- To debug: open Chrome and navigate to [chrome://inspect](chrome://inspect) and click `Open dedicated DevTools for Node`. Or install [Node.js V8 --inspector Manager (NiM)](https://chrome.google.com/webstore/detail/nodejs-v8-inspector-manag/gnhhdgbaldcilmgcpfddgdbkhjohddkj)
 
 ### Running in Production Mode
 - Run `npm start`
@@ -145,3 +146,47 @@ hour is up, the client will request another token.
     "resolver": "",
 }
 ```
+
+## Running with Docker
+### Build container
+Go to the directory that has the Dockerfile and run the following command to build the Docker image. The -t flag lets you tag your image so it's easier to find later using the docker images command
+```docker build -t apollotv-server .```
+Your image will now be listed by Docker
+
+### Run container
+Running your image with -d runs the container in detached mode, leaving the container running in the background. The -p flag redirects a public port to a private port inside the container. Run the image you previously built The --env-file flag points to an env file containing environment variables you want your app to be aware of
+```docker run -p 80:3000 --env-file ./.env apollotv-server```
+
+### Other commands
+
+#### List containers
+```docker container ls --all```
+
+#### List images
+```docker image ls --all```
+
+#### Print app output
+```docker logs <container id>```
+
+#### Stop all containers
+```docker stop $(docker ps -a -q)```
+
+#### Delete all containers
+```docker rm $(docker ps -a -q)```
+
+#### Delete all images
+```docker rmi -f $(docker images -q)```
+
+### PM2 commands
+
+#### Monitoring CPU/Usage of each process
+```docker exec -it <container-id> pm2 monit```
+
+#### Listing managed processes
+```docker exec -it <container-id> pm2 list```
+
+#### Get more information about a process
+```docker exec -it <container-id> pm2 show```
+
+#### 0sec downtime reload all applications
+```docker exec -it <container-id> pm2 reload all```

@@ -3,7 +3,7 @@
 // Import dependencies
 const SSE = require('express-sse');
 const {verifyToken} = require('../utils');
-const emitter = require('../utils/eventEmitter');
+const EventEmitter = require('events');
 
 // Load providers
 const providers = require('../scrapers/providers');
@@ -26,6 +26,9 @@ searchRoutes.get('/movies', verifyToken, async (req, res) => {
     sse.init(req, res);
     sendInitialStatus(sse);
 
+    const emitter = new EventEmitter();
+    sse.emitter = emitter;
+
     const promises = [];
 
     // Get movie providers.
@@ -33,10 +36,10 @@ searchRoutes.get('/movies', verifyToken, async (req, res) => {
 
     req.on('close', function() {
         console.log('disconnected');
-        emitter.emit('disconnected');
+        sse.emitter.emit('disconnected');
     });
 
-    emitter.on('disconnected', () => {
+    sse.emitter.on('disconnected', () => {
         sse.stopExecution = true;
     });
 
@@ -54,6 +57,9 @@ searchRoutes.get('/tv', verifyToken, async (req, res) => {
     sse.init(req, res);
     sendInitialStatus(sse);
 
+    const emitter = new EventEmitter();
+    sse.emitter = emitter;
+
     const promises = [];
 
     // Get TV providers.
@@ -61,10 +67,10 @@ searchRoutes.get('/tv', verifyToken, async (req, res) => {
 
     req.on('close', function() {
         console.log('disconnected');
-        emitter.emit('disconnected');
+        sse.emitter.emit('disconnected');
     });
 
-    emitter.on('disconnected', () => {
+    sse.emitter.on('disconnected', () => {
         sse.stopExecution = true;
     });
 

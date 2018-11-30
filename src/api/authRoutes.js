@@ -3,7 +3,7 @@
 // Import dependencies
 const bcrypt = require('../../public/bcrypt');
 const jwt = require('jsonwebtoken');
-const {RateLimiterMemory} = require('rate-limiter-flexible');
+const {RateLimiterCluster, RateLimiterMemory} = require('rate-limiter-flexible');
 
 // Define constants
 const authDelay = 5;
@@ -12,11 +12,19 @@ const authDelay = 5;
 const authRoutes = require('express').Router();
 
 // Rate limit 3 requests per hour
-const opts = {
-    points: 3, // 3 requests
-    duration: 3600, // per hour
-};
-const rateLimiter = new RateLimiterMemory(opts);
+const rateLimiter = process.env.NODE_ENV === 'production' ?
+    new RateLimiterCluster({
+        keyPrefix: 'pm2clusterlimiter', // name the limiter something unique
+        points: 3, // 3 requests
+        duration: 3600, // per hour
+        timeoutMs: 3000 // Promise is rejected, if master doesn't answer for 3 secs (cluster option)
+    }) :
+    new RateLimiterMemory({
+        keyPrefix: 'memorylimiter', // name the limiter something unique
+        points: 3, // 3 requests
+        duration: 3600, // per hour
+        timeoutMs: 3000 // Promise is rejected, if master doesn't answer for 3 secs (cluster option)
+    })
 
 async function rateLimit(req, res, next) {
     try {
@@ -57,7 +65,7 @@ authRoutes.post('/login', rateLimit, async (req, res) => {
     }
 
     // create a token
-    const token = jwt.sign({id: 'ApolloTV', message: 'This better be from our app...'}, process.env.SECRET_SERVER_ID, {
+    const token = jwt.sign({id: 'ApolloTV Official App', message: 'This better be from our app...', ip: req.client.remoteAddress}, process.env.SECRET_SERVER_ID, {
         expiresIn: 3600 // expires in 1 hour
     });
 
