@@ -66,7 +66,14 @@ function OpenloadHtml(providerPageHtml) {
         vm.createContext(sandbox); // Contextify the sandbox.
         vm.runInContext($('script').last()[0].children[0].data, sandbox);
 
-        return `https://openload.co/stream/${wholeFileId}?mime=true`;
+        const sourceUrl = `https://openload.co/stream/${wholeFileId}?mime=true`;
+        const isValidUrl = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(sourceUrl);
+
+        if (!isValidUrl) {
+            throw 'Openload: URL malformed'
+        }
+
+        return sourceUrl;
     }
 
     throw 'Openload: File not found';
