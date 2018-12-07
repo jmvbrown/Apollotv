@@ -54,6 +54,8 @@ function OpenloadHtml(providerPageHtml) {
                 }
             },
             window: {
+                $: jQuery,
+                jQuery
             },
             sin: Math.sin,
             navigator: {
