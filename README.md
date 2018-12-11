@@ -13,7 +13,7 @@ Install node^10.14.0 and npm^6.4.1.
 
 ### Security
 In order to authenticate with the server, the client must make a login
-request with the hashed (using the `bcrypt` library) `SECRET_CLIENT_ID` and the
+request with the hashed (using the `pbkdf2` library) `SECRET_CLIENT_ID` and the
 current time. It will look like this before it's hashed:
 
 `${current time in seconds}|${SECRET_CLIENT_ID}`
