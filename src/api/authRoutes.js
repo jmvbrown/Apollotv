@@ -51,17 +51,20 @@ authRoutes.post('/login', rateLimit, async (req, res) => {
     let clientIsValid = false;
     let now;
 
-    for (let time = now = Math.floor((new Date()).valueOf() / 1000); time >= now - authDelay && !clientIsValid; time--) {
-        clientIsValid = await (new Promise((resolve, reject) => {
-            pbkdf2.pbkdf2(`${time}|${process.env.SECRET_CLIENT_ID}`, salt, 5000, 32, 'sha256', (err, derivedKey) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    console.log(derivedKey.toString('base64'));
-                    resolve(derivedKey.toString('base64') === clientIdHash);
-                }
-            });
-        }));
+    try {
+        for (let time = now = Math.floor((new Date()).valueOf() / 1000); time >= now - authDelay && !clientIsValid; time--) {
+            clientIsValid = await (new Promise((resolve, reject) => {
+                pbkdf2.pbkdf2(`${time}|${process.env.SECRET_CLIENT_ID}`, salt, 5000, 32, 'sha256', (err, derivedKey) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(derivedKey.toString('base64') === clientIdHash);
+                    }
+                });
+            }));
+        }
+    } catch (err) {
+        console.error(err);
     }
 
     if (!clientIsValid) {
