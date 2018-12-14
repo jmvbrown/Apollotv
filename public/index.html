@@ -183,9 +183,10 @@
             <button type="button" onclick="stop()">Stop</button>
         </div>
         <div id="results"></div>
-        <script type="text/javascript" charset="utf-8" src="pbkdf2.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="bcrypt.js"></script>
         <script type="text/javascript" charset="utf-8">
             const SECRET_CLIENT_ID = 'thisisjustaclienttest';
+            const bcrypt = dcodeIO.bcrypt;
             let es;
             async function authenticate() {
                 let token = localStorage.getItem('token');
@@ -197,20 +198,19 @@
                     }
                 }
 
-                const salt = window.crypto.getRandomValues(new Uint32Array(3)).toString('base64');
                 const hashedSecret = await (new Promise((resolve, reject) => {
-                    pbkdf2.pbkdf2(`${Math.floor((new Date()).valueOf() / 1000)}|${SECRET_CLIENT_ID}`, salt, 5000, 32, 'sha256',  function(err, hash) {
+                    bcrypt.hash(`${Math.floor((new Date()).valueOf() / 1000)}|${SECRET_CLIENT_ID}`, 10, function(err, hash) {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(hash.toString('base64'));
+                            resolve(hash);
                         }
                     });
                 }));
 
                 const response = await fetch('/api/v1/login', {
                     method: 'POST',
-                    body: JSON.stringify({clientID: `${hashedSecret};${salt}`}),
+                    body: JSON.stringify({clientID: hashedSecret}),
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -226,48 +226,44 @@
             }
             async function searchMovies() {
                 let token = await authenticate();
-                if (token) {
-                    var movieTitle = document.getElementById('movieTitle').value;
-                    es = new EventSource(`/api/v1/search/movies?title=${movieTitle}&token=${token}`);
-                    es.addEventListener('result', function (e) {
-                        console.log(e.data);
-                    });
-                    es.addEventListener('scrape', function (e) {
-                        console.log(e.data);
-                    });
-                    es.addEventListener('error', function (e) {
-                        console.error(e.data);
-                    });
-                    es.addEventListener('done', function (e) {
-                        console.log(e.data);
-                        console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
-                        es.close();
-                    });
-                }
+                var movieTitle = document.getElementById('movieTitle').value;
+                es = new EventSource(`/api/v1/search/movies?title=${movieTitle}&token=${token}`);
+                es.addEventListener('result', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('scrape', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('error', function (e) {
+                    console.error(e.data);
+                });
+                es.addEventListener('done', function (e) {
+                    console.log(e.data);
+                    console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
+                    es.close();
+                });
             }
             async function searchTV() {
                 let token = await authenticate();
-                if (token) {
-                    var showTitle = document.getElementById('showTitle').value;
-                    var season = document.getElementById('season').value;
-                    var episode = document.getElementById('episode').value;
+                var showTitle = document.getElementById('showTitle').value;
+                var season = document.getElementById('season').value;
+                var episode = document.getElementById('episode').value;
 
-                    es = new EventSource(`/api/v1/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
-                    es.addEventListener('result', function (e) {
-                        console.log(e.data);
-                    });
-                    es.addEventListener('scrape', function (e) {
-                        console.log(e.data);
-                    });
-                    es.addEventListener('error', function (e) {
-                        console.error(e.data);
-                    });
-                    es.addEventListener('done', function (e) {
-                        console.log(e.data);
-                        console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
-                        es.close();
-                    });
-                }
+                es = new EventSource(`/api/v1/search/tv?title=${showTitle}&season=${season}&episode=${episode}&token=${token}`)
+                es.addEventListener('result', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('scrape', function (e) {
+                    console.log(e.data);
+                });
+                es.addEventListener('error', function (e) {
+                    console.error(e.data);
+                });
+                es.addEventListener('done', function (e) {
+                    console.log(e.data);
+                    console.log('There should be no more events after this one. Comment out the `close` line to see if there are any events leaking.');
+                    es.close();
+                });
             }
             function stop() {
                 es && es.close();

@@ -1,7 +1,7 @@
 'use strict';
 
 // Import dependencies
-const pbkdf2 = require('pbkdf2');
+const bcrypt = require('../../public/bcrypt');
 const jwt = require('jsonwebtoken');
 const {RateLimiterCluster, RateLimiterMemory} = require('rate-limiter-flexible');
 
@@ -45,26 +45,19 @@ async function rateLimit(req, res, next) {
  * If validated, it will generate a token that can be used by the client for one hour.
  */
 authRoutes.post('/login', rateLimit, async (req, res) => {
-    const splitBody = req.body.clientID.split(';');
-    const clientIdHash = splitBody[0];
-    const salt = splitBody[1];
     let clientIsValid = false;
     let now;
 
-    try {
-        for (let time = now = Math.floor((new Date()).valueOf() / 1000); time >= now - authDelay && !clientIsValid; time--) {
-            clientIsValid = await (new Promise((resolve, reject) => {
-                pbkdf2.pbkdf2(`${time}|${process.env.SECRET_CLIENT_ID}`, salt, 5000, 32, 'sha256', (err, derivedKey) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(derivedKey.toString('base64') === clientIdHash);
-                    }
-                });
-            }));
-        }
-    } catch (err) {
-        console.error(err);
+    for (let time = now = Math.floor((new Date()).valueOf() / 1000); time >= now - authDelay && !clientIsValid; time--) {
+        clientIsValid = await (new Promise((resolve, reject) => {
+            bcrypt.compare(`${time}|${process.env.SECRET_CLIENT_ID}`, req.body.clientID, function(err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        }));
     }
 
     if (!clientIsValid) {

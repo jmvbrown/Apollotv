@@ -47,7 +47,7 @@ app.get('/', function(req, res) {
         res.sendFile(`${pathToApp}/public/index.html`);
     }
 });
-app.get('/pbkdf2.min.js', (req, res) => res.sendFile(`${pathToApp}/public/pbkdf2.min.js`));
+app.get('/bcrypt.js', (req, res) => res.sendFile(`${pathToApp}/public/bcrypt.js`));
 /** ./RENDERED ROUTES **/
 
 
