@@ -148,4 +148,4 @@ hour is up, the client will request another token.
 ```
 
 ### Running the Server
-Please refer to the Wiki article: [Developer & Release Mode](https://github.com/ApolloTVofficial/Claws/wiki/Developer-&-Release-Mode)
+Please refer to the Wiki article: [Running the Server](https://github.com/ApolloTVofficial/Claws/wiki/Running-the-Server)
