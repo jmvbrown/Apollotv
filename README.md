@@ -1,7 +1,7 @@
 # Claws
 The server-side scraper software for ApolloTV.
 
-## Getting Started
+## Documentation
 
 ### Installation
 * [Setting up Claws](https://github.com/ApolloTVofficial/Claws/wiki/Setting-up-Claws)
