@@ -4,12 +4,7 @@ The server-side scraper software for ApolloTV.
 ## Getting Started
 
 ### Installation
-Install node^10.14.0 and npm^6.4.1.
-- Clone the repository and navigate to the directory.
-- Run `npm install`.
-- Copy the contents of `.env.dist` to a file called `.env`.
-- Fill in the values for `SECRET_SERVER_ID` and `SECRET_CLIENT_ID`.
-    - You can use `./generate-env-values.sh` to help.
+Please refer to the Wiki article: [Setting up Claws](https://github.com/ApolloTVofficial/Claws/wiki/Setting-up-Claws)
 
 ### Security
 In order to authenticate with the server, the client must make a login
